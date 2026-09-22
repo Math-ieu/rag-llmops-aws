@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: rag_pgvector
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: rag_llmops
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rag_backend
+    environment:
+      - APP_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgrespassword@pgvector:5432/rag_llmops
+      - AWS_REGION=us-east-1
+      - BEDROCK_LLM_MODEL_ID=anthropic.claude-3-5-sonnet-20240620-v1:0
+      - BEDROCK_EMBEDDING_MODEL_ID=amazon.titan-embed-text-v2:0
+      - MOCK_BEDROCK=false
+    ports:
+      - "8000:8000"
+    depends_on:
+      pgvector:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rag_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

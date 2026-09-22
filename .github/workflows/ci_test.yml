@@ -1,0 +1,33 @@
+name: CI Tests & Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run Backend Tests
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          MOCK_BEDROCK=True pytest tests/
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+      - name: Validate Terraform Syntax
+        run: |
+          cd terraform
+          terraform init -backend=false
+          terraform validate

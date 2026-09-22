@@ -1,0 +1,56 @@
+name: LLMOps Quality Gate (Anti-Regression)
+
+on:
+  pull_request:
+    paths:
+      - 'backend/app/generation/**'
+      - 'backend/app/retrieval/**'
+      - 'backend/app/evaluation/**'
+
+jobs:
+  evaluation-gate:
+    name: Automated Prompt & RAG Evaluation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run Anti-Regression Quality Gate
+        env:
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BEDROCK_LLM_MODEL_ID: anthropic.claude-3-5-sonnet-20240620-v1:0
+          MOCK_BEDROCK: ${{ secrets.AWS_ACCESS_KEY_ID == '' }}
+        run: |
+          cd backend
+          python -m app.evaluation.regression_gate app/evaluation/golden_dataset.json
+
+      - name: Publish Evaluation Report to PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'backend/eval_report.md';
+            if (fs.existsSync(reportPath)) {
+              const body = fs.readFileSync(reportPath, 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }

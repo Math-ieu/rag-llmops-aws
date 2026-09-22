@@ -1,0 +1,37 @@
+[
+  {
+    "id": "eval-01",
+    "question": "Quels sont les objectifs clés d'une plateforme d'observabilité LLM en production ?",
+    "ground_truth": "Les objectifs sont de tracer chaque appel LLM (prompt, réponse, latence, tokens, coût), de suivre les coûts par utilisateur/fonctionnalité, de détecter les dérives de qualité (drift) et de déclencher des alertes automatiques en cas d'anomalie.",
+    "keywords": ["traçabilité", "latence", "tokens", "coûts", "drift", "alertes"],
+    "domain": "LLMOps"
+  },
+  {
+    "id": "eval-02",
+    "question": "Comment fonctionne l'évaluation LLM-as-a-judge ?",
+    "ground_truth": "L'évaluation LLM-as-a-judge consiste à utiliser un grand modèle de langage pour évaluer automatiquement les réponses d'un autre modèle selon une grille de critères préétablie (fidélité, pertinence, clarté) en fournissant une note et une justification explicite.",
+    "keywords": ["juge", "grille de notation", "fidélité", "pertinence", "justification"],
+    "domain": "Évaluation"
+  },
+  {
+    "id": "eval-03",
+    "question": "Quelles sont les étapes principales pour concevoir un pipeline RAG haute performance ?",
+    "ground_truth": "Les étapes principales sont l'ingestion et le découpage propre en chunks, la vectorisation avec embeddings adaptés, l'indexation dans une base vectorielle, la recherche hybride dense/sparse, le reranking des résultats candidats, puis la génération contextuelle avec le LLM.",
+    "keywords": ["ingestion", "chunking", "embeddings", "base vectorielle", "recherche hybride", "reranking"],
+    "domain": "RAG"
+  },
+  {
+    "id": "eval-04",
+    "question": "Pourquoi la recherche hybride dense + sparse est-elle supérieure à la simple recherche vectorielle ?",
+    "ground_truth": "La recherche hybride combine la compréhension sémantique de la recherche dense (vecteurs) et la précision des mots-clés exacts de la recherche sparse (BM25), évitant ainsi d'omettre des termes techniques rares, des codes ou des identifiants.",
+    "keywords": ["sémantique", "mots-clés", "BM25", "dense", "sparse", "exactitude"],
+    "domain": "Retrieval"
+  },
+  {
+    "id": "eval-05",
+    "question": "Quel est le comportement attendu du modèle si l'information demandée n'est pas présente dans le contexte ?",
+    "ground_truth": "Le modèle doit refuser d'extrapoler et indiquer honnêtement qu'il ne dispose pas de suffisamment d'informations dans les documents fournis pour répondre, évitant ainsi toute hallucination.",
+    "keywords": ["refuser", "hallucination", "contexte", "honnêteté", "insuffisant"],
+    "domain": "Garde-fous"
+  }
+]
