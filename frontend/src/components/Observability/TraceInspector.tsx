@@ -11,23 +11,13 @@ export const TraceInspector: React.FC<TraceInspectorProps> = ({ health }) => {
     <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-8 space-y-8">
       {/* En-tête élargi */}
       <div>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Observabilité, Télémétrie & Évaluation Continue
-            </h2>
-            <p className="text-base text-slate-600 dark:text-slate-400 mt-2 max-w-4xl leading-relaxed">
-              Supervision en temps réel des performances LLMOps : traçabilité distribuée (Langfuse),
-              suivi granulaire des coûts par requête et Quality Gate anti-régression (RAGAS + LLM-as-a-Judge sur AWS Bedrock).
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Système Opérationnel
-            </span>
-          </div>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          Observabilité, Télémétrie & Évaluation Continue
+        </h2>
+        <p className="text-base text-slate-600 dark:text-slate-400 mt-2 max-w-4xl leading-relaxed">
+          Supervision en temps réel des performances LLMOps : traçabilité distribuée (Langfuse),
+          suivi granulaire des coûts par requête et Quality Gate anti-régression (RAGAS + LLM-as-a-Judge sur AWS Bedrock).
+        </p>
       </div>
 
       {/* KPI Cards Grid - Large & Spacious */}
