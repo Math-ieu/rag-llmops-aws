@@ -24,22 +24,22 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   };
 
   return (
-    <div className={`flex gap-3 max-w-3xl ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'} group`}>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-sm transition-transform duration-150 ${
+    <div className={`flex gap-3.5 max-w-4xl w-full ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'} group`}>
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-sm transition-transform duration-150 ${
         isUser
           ? 'bg-indigo-600 text-white'
           : 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 dark:border-orange-500/30'
       }`}>
-        {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+        {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
       </div>
 
-      <div className={`space-y-2 overflow-hidden ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`relative px-4 py-3 rounded-2xl text-sm leading-relaxed transition-colors duration-200 ${
+      <div className={`space-y-2 overflow-hidden flex-1 ${isUser ? 'items-end' : 'items-start'}`}>
+        <div className={`relative px-5 py-4 rounded-2xl text-base leading-relaxed transition-colors duration-200 ${
           isUser 
-            ? 'bg-indigo-600 text-white rounded-tr-none shadow-sm' 
+            ? 'bg-indigo-600 text-white rounded-tr-none shadow-sm ml-auto max-w-2xl' 
             : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none shadow-sm dark:shadow-none'
         }`}>
-          <div className="prose prose-slate dark:prose-invert prose-sm max-w-[68ch] break-words">
+          <div className="prose prose-slate dark:prose-invert prose-base max-w-none break-words">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
 
