@@ -34,8 +34,8 @@ export const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({ traceId, initi
         title="Réponse utile et exacte (+1 Langfuse)"
         className={`p-1 rounded text-xs transition-colors ${
           selected === 1.0
-            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-            : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+            : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:text-slate-300 dark:hover:bg-slate-800'
         }`}
       >
         <ThumbsUp className="w-3.5 h-3.5" />
@@ -47,8 +47,8 @@ export const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({ traceId, initi
         title="Réponse imprécise ou inexacte (-1 Langfuse)"
         className={`p-1 rounded text-xs transition-colors ${
           selected === -1.0
-            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-            : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+            ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20'
+            : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:text-slate-300 dark:hover:bg-slate-800'
         }`}
       >
         <ThumbsDown className="w-3.5 h-3.5" />
