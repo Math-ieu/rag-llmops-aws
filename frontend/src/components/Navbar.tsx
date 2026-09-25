@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, ShieldCheck, Database, Cpu, Cloud } from 'lucide-react';
+import { Database, Cloud } from 'lucide-react';
 import { SystemHealth } from '../types';
 
 interface NavbarProps {

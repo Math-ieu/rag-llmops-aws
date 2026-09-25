@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { FileText, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { SourceChunk } from '../../types';
 
 interface SourceCardProps {
   source: SourceChunk;
-  index: number;
+  index?: number;
 }
 
-export const SourceCard: React.FC<SourceCardProps> = ({ source, index }) => {
+export const SourceCard: React.FC<SourceCardProps> = ({ source }) => {
   const [expanded, setExpanded] = useState(false);
   const score = source.rerank_score ?? source.similarity_score ?? 0;
   const scorePercent = Math.round(score * 100);

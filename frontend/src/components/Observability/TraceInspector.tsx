@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, ShieldCheck, DollarSign, Clock, Layers, Award, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Activity, ShieldCheck, DollarSign, Clock, Award } from 'lucide-react';
 import { SystemHealth } from '../../types';
 
 interface TraceInspectorProps {
