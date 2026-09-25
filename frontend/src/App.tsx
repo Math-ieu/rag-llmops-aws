@@ -11,25 +11,43 @@ export const App: React.FC = () => {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
-  // Gestion du thème Light / Dark avec persistance localStorage
+  // Initialisation du thème avec prise en compte du localStorage et du DOM actuel
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'light' || saved === 'dark') return saved;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark';
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+    } catch (e) {}
+    return 'dark';
   });
 
-  useEffect(() => {
+  const applyTheme = (targetTheme: 'light' | 'dark') => {
     const root = document.documentElement;
-    if (theme === 'dark') {
+    const body = document.body;
+    if (targetTheme === 'dark') {
       root.classList.add('dark');
+      body.classList.add('dark');
     } else {
       root.classList.remove('dark');
+      body.classList.remove('dark');
     }
-    localStorage.setItem('theme', theme);
+    try {
+      localStorage.setItem('theme', targetTheme);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    applyTheme(theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme((prev) => {
+      const nextTheme = prev === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      return nextTheme;
+    });
   };
 
   const loadHealth = async () => {
@@ -60,7 +78,7 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-800 dark:text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
       <Navbar
         health={health}
         activeTab={activeTab}

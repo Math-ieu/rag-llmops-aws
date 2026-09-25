@@ -2,11 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-slate-50 dark:bg-[#0b0f17] text-slate-800 dark:text-slate-100 transition-colors duration-200;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+html {
+  color-scheme: light dark;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 transition-colors duration-200;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+html.dark body {
+  @apply bg-[#0b0f17] text-slate-100;
 }
 
 /* Custom subtle scrollbar */
