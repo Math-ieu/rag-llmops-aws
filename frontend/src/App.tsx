@@ -10,6 +10,27 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'chat' | 'ingest' | 'observability'>('chat');
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  
+  // Gestion du thème Light / Dark avec persistance localStorage
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const loadHealth = async () => {
     try {
@@ -26,7 +47,7 @@ export const App: React.FC = () => {
         bedrock_embedding_model: 'amazon.titan-embed-text-v2:0',
         mock_bedrock: false,
         prompt_version: 'v1.2.0',
-        total_chunks_indexed: 12,
+        total_chunks_indexed: 4,
         vector_store_type: 'pgvector (PostgreSQL)'
       });
     }
@@ -39,8 +60,14 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-      <Navbar health={health} activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-800 dark:text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
+      <Navbar
+        health={health}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
       
       <main className="flex-1 overflow-hidden">
         {activeTab === 'chat' && (

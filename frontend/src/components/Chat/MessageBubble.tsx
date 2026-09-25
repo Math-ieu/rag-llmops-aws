@@ -14,39 +14,41 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
   return (
     <div className={`flex gap-3 max-w-3xl ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-        isUser ? 'bg-indigo-600 text-white' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${
+        isUser
+          ? 'bg-indigo-600 text-white'
+          : 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 dark:border-orange-500/30'
       }`}>
         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
       </div>
 
       <div className={`space-y-2 overflow-hidden ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed transition-colors duration-200 ${
           isUser 
-            ? 'bg-indigo-600 text-white rounded-tr-none' 
-            : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
+            ? 'bg-indigo-600 text-white rounded-tr-none shadow-sm' 
+            : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none shadow-sm dark:shadow-none'
         }`}>
-          <div className="prose prose-invert prose-sm max-w-none break-words">
+          <div className="prose prose-slate dark:prose-invert prose-sm max-w-none break-words">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         </div>
 
         {!isUser && message.sources && message.sources.length > 0 && (
           <div className="space-y-1.5 pt-1">
-            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Layers className="w-3 h-3 text-orange-400" />
+            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-3 h-3 text-orange-500 dark:text-orange-400" />
               Sources documentaires citées ({message.sources.length}) :
             </div>
             <div className="grid grid-cols-1 gap-1.5">
               {message.sources.map((s, idx) => (
-                <SourceCard key={s.id || idx} source={s} index={idx} />
+                <SourceCard key={s.id || idx} source={s} />
               ))}
             </div>
           </div>
         )}
 
         {!isUser && (
-          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 font-mono pt-1">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 font-mono pt-1">
             {message.metrics && (
               <>
                 <span className="flex items-center gap-1">
@@ -54,13 +56,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                   {message.metrics.total_latency_ms} ms
                 </span>
                 {message.metrics.cost_usd !== undefined && (
-                  <span className="flex items-center gap-1 text-emerald-400">
+                  <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
                     <DollarSign className="w-3 h-3" />
                     ${message.metrics.cost_usd.toFixed(5)}
                   </span>
                 )}
                 {message.metrics.prompt_version && (
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                     {message.metrics.prompt_version}
                   </span>
                 )}

@@ -122,16 +122,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-[#0b0f17]">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50 dark:bg-[#0b0f17] transition-colors duration-200">
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center max-w-xl mx-auto space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 dark:text-orange-400 shadow-sm">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-semibold text-white">Assistant RAG Production-Ready</h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Assistant RAG Production-Ready</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               Posez une question technique sur l'architecture LLMOps, les pipelines RAG, l'évaluation continue ou l'observabilité sur AWS.
             </p>
             <div className="flex flex-wrap gap-2 justify-center pt-2">
@@ -139,7 +139,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
                 <button
                   key={idx}
                   onClick={() => handleSend(s)}
-                  className="px-3 py-1.5 rounded-full text-xs bg-slate-900 border border-slate-800 text-slate-300 hover:border-orange-500/40 hover:text-white transition-all text-left"
+                  className="px-3 py-1.5 rounded-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-orange-500/40 hover:text-orange-600 dark:hover:text-white transition-all text-left shadow-sm"
                 >
                   {s}
                 </button>
@@ -153,16 +153,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
       </div>
 
       {/* Input Box */}
-      <div className="border-t border-slate-800 bg-[#0d131f] p-4">
+      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d131f] p-4 transition-colors duration-200">
         <div className="max-w-3xl mx-auto space-y-2">
           {error && (
-            <div className="flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg">
+            <div className="flex items-center gap-2 text-xs text-rose-500 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="relative flex items-center bg-slate-900/90 border border-slate-700/80 rounded-xl overflow-hidden focus-within:border-orange-500/60 shadow-lg">
+          <div className="relative flex items-center bg-slate-50 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 rounded-xl overflow-hidden focus-within:border-orange-500 shadow-sm dark:shadow-lg transition-colors">
             <textarea
               rows={1}
               value={input}
@@ -170,7 +170,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
               onKeyDown={handleKeyDown}
               placeholder="Posez votre question (ex: Comment fonctionne le reranking ?)..."
               disabled={isStreaming}
-              className="w-full bg-transparent px-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none resize-none font-sans"
+              className="w-full bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none resize-none font-sans"
             />
             <button
               onClick={() => handleSend()}
@@ -184,7 +184,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
               )}
             </button>
           </div>
-          <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 font-mono">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-1 font-mono">
             <span>Shift + Entrée pour retour à la ligne</span>
             <span>Tracing Langfuse actif • Streaming SSE</span>
           </div>

@@ -13,27 +13,27 @@ export const SourceCard: React.FC<SourceCardProps> = ({ source }) => {
   const scorePercent = Math.round(score * 100);
 
   return (
-    <div className="border border-slate-800 bg-slate-900/60 rounded-lg p-2.5 text-xs transition-colors hover:border-slate-700">
+    <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 rounded-lg p-2.5 text-xs transition-colors hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-none">
       <div 
         className="flex items-center justify-between cursor-pointer select-none"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <FileText className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-          <span className="font-medium text-slate-200 truncate">
+          <FileText className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0" />
+          <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
             {source.metadata.source} (p. {source.metadata.page || 1})
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
             {scorePercent}% match
           </span>
-          {expanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+          {expanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />}
         </div>
       </div>
 
       {expanded && (
-        <div className="mt-2 pt-2 border-t border-slate-800 text-slate-300 font-mono text-[11px] leading-relaxed bg-[#0b0f17]/50 p-2 rounded">
+        <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px] leading-relaxed bg-slate-50 dark:bg-[#0b0f17]/50 p-2 rounded">
           {source.content}
         </div>
       )}
