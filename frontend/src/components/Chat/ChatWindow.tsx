@@ -115,10 +115,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
   };
 
   const suggestions = [
-    "Qu'est-ce que l'observabilité LLMOps en production ?",
-    "Comment fonctionne la recherche hybride avec RRF ?",
-    "Quels sont les objectifs d'un LLM-as-a-Judge ?",
-    "Quelle est la politique anti-hallucination du prompt ?"
+    "Observabilité LLMOps",
+    "Recherche hybride RRF",
+    "Évaluation LLM-as-a-Judge",
+    "Garde-fous anti-hallucination"
   ];
 
   return (
@@ -126,22 +126,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto px-6 lg:px-10 py-6 space-y-6">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-6 py-12">
-            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 dark:text-orange-400 shadow-md">
-              <Sparkles className="w-8 h-8" />
+          <div className="h-full flex flex-col items-center justify-center text-center max-w-xl mx-auto space-y-5 py-12">
+            <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 dark:text-orange-400 shadow-sm">
+              <Sparkles className="w-7 h-7" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Assistant RAG Production-Ready
-            </h2>
-            <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
-              Posez une question technique sur l'architecture LLMOps, les pipelines RAG, l'évaluation continue ou l'observabilité sur AWS.
-            </p>
-            <div className="flex flex-wrap gap-2.5 justify-center pt-2">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Assistant RAG
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Posez votre question.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center pt-1">
               {suggestions.map((s, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSend(s)}
-                  className="px-4 py-2 rounded-xl text-sm bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-orange-500/50 hover:text-orange-600 dark:hover:text-white transition-all text-left shadow-sm"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-orange-500/50 hover:text-orange-600 dark:hover:text-white transition-all text-left shadow-sm"
                 >
                   {s}
                 </button>
@@ -172,7 +174,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Posez votre question (ex: Comment fonctionne le reranking ?)..."
+              placeholder="Posez votre question..."
               disabled={isStreaming}
               className="w-full bg-transparent px-5 py-4 text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none resize-none font-sans"
             />
@@ -188,9 +190,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
               )}
             </button>
           </div>
-          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-2 font-mono">
-            <span>Shift + Entrée pour retour à la ligne</span>
-            <span>Tracing Langfuse actif • Streaming SSE</span>
+          <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 px-2 font-mono">
+            <span>Entrée pour envoyer</span>
+            <span>Streaming SSE</span>
           </div>
         </div>
       </div>

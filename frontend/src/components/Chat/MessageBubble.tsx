@@ -61,9 +61,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
         {!isUser && message.sources && message.sources.length > 0 && (
           <div className="space-y-1.5 pt-1">
-            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400" />
-              Sources documentaires vérifiées ({message.sources.length}) :
+              Sources ({message.sources.length})
             </div>
             <div className="grid grid-cols-1 gap-1.5">
               {message.sources.map((s, idx) => (

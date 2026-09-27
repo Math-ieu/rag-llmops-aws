@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, CheckCircle, AlertCircle, FileText, Database, Layers, Cpu, Server } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertCircle, FileText, Layers, Cpu, Server } from 'lucide-react';
 import { uploadDocumentFile } from '../../services/api';
 
 interface DocumentUploaderProps {
@@ -38,31 +38,30 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onIndexedSuc
 
   return (
     <div className="w-full max-w-6xl mx-auto px-6 sm:px-8 lg:px-10 py-8 space-y-8">
-      {/* En-tête élargi */}
+      {/* En-tête concis */}
       <div>
         <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Ingestion Documentaire & Vectorisation
+          Ingestion
         </h2>
-        <p className="text-base text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
-          Téléversez vos documents sources (PDF, Markdown, TXT). Le pipeline découpe le texte en chunks sémantiques,
-          calcule les embeddings vectoriels avec Amazon Titan Embeddings v2 et les persiste dans PostgreSQL (<code className="text-orange-600 dark:text-orange-400 font-mono">pgvector</code>).
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Ajout de documents à la base vectorielle.
         </p>
       </div>
 
-      {/* Zone de Dropzone Agrandie */}
-      <div className="border-2 border-dashed border-slate-300 dark:border-slate-700/80 hover:border-orange-500 rounded-3xl p-12 sm:p-16 text-center bg-white dark:bg-slate-900/40 transition-all shadow-sm dark:shadow-none group">
-        <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-          <UploadCloud className="w-9 h-9 text-orange-500 dark:text-orange-400" />
+      {/* Zone de Dropzone */}
+      <div className="border-2 border-dashed border-slate-300 dark:border-slate-700/80 hover:border-orange-500 rounded-3xl p-12 text-center bg-white dark:bg-slate-900/40 transition-all shadow-sm dark:shadow-none group">
+        <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform">
+          <UploadCloud className="w-8 h-8 text-orange-500 dark:text-orange-400" />
         </div>
         
-        <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-          Glissez-déposez vos fichiers ici ou parcourez votre disque
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+          Déposez un fichier ici
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-          Formats acceptés : PDF, Markdown (.md), Fichiers texte brut (.txt) • Jusqu'à 20 Mo par document
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          PDF, Markdown, TXT (max 20 Mo)
         </p>
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-5 flex justify-center">
           <label className="cursor-pointer inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 text-sm font-semibold transition-all shadow-sm">
             <span>Sélectionner un fichier</span>
             <input
@@ -88,77 +87,64 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onIndexedSuc
             <button
               onClick={handleUpload}
               disabled={uploading}
-              className="px-5 py-2.5 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 disabled:opacity-50 transition-colors shadow-md shrink-0"
+              className="px-4 py-2 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 disabled:opacity-50 transition-colors shadow-sm shrink-0"
             >
-              {uploading ? 'Vectorisation...' : 'Indexer dans pgvector'}
+              {uploading ? 'Indexation...' : 'Indexer'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Résultat d'ingestion réussi */}
+      {/* Résultat d'ingestion */}
       {result && (
-        <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-start gap-4">
-          <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-          <div className="space-y-1.5">
-            <h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-base">Document indexé avec succès !</h4>
-            <p className="text-sm text-slate-700 dark:text-slate-300 font-mono">
-              Document : <span className="text-slate-900 dark:text-white font-bold">{result.document_name}</span> &bull; Chunks créés :{' '}
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{result.chunks_created}</span> &bull; Total en base vectorielle :{' '}
-              <span className="text-sky-600 dark:text-sky-400 font-bold">{result.total_indexed_chunks} chunks</span>
-            </p>
-          </div>
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-mono">
+            Indexé : <span className="font-bold text-slate-900 dark:text-white">{result.document_name}</span> &bull;{' '}
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">{result.chunks_created} chunks créés</span> &bull; Total :{' '}
+            <span className="text-sky-600 dark:text-sky-400 font-bold">{result.total_indexed_chunks} chunks</span>
+          </p>
         </div>
       )}
 
-      {/* Erreur d'ingestion */}
+      {/* Erreur */}
       {error && (
-        <div className="p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-start gap-4">
-          <AlertCircle className="w-6 h-6 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" />
-          <div className="text-sm text-rose-700 dark:text-rose-300">
-            <h4 className="font-bold text-base">Erreur lors de l'ingestion</h4>
-            <p className="mt-1">{error}</p>
-          </div>
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-500 dark:text-rose-400 shrink-0" />
+          <p className="text-xs sm:text-sm text-rose-700 dark:text-rose-300 font-medium">Erreur : {error}</p>
         </div>
       )}
 
-      {/* Stratégie Architecture en 3 Colonnes Agrandie */}
-      <div className="space-y-4">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Database className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-          Spécifications Techniques du Pipeline d'Ingestion
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm dark:shadow-none">
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-              <Layers className="w-5 h-5 text-orange-500 dark:text-orange-400" />
-            </div>
-            <h4 className="font-bold text-sm text-slate-900 dark:text-white">Chunking Sémantique</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Découpage par fenêtres de <strong>600 caractères</strong> avec <strong>100 caractères de recouvrement</strong> (overlap) pour préserver la continuité contextuelle entre segments adjacents.
-            </p>
+      {/* Spécifications - Essentiel uniquement */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-none">
+          <div className="flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
+            <Layers className="w-4 h-4 text-orange-500" />
+            <span>Chunking</span>
           </div>
+          <p className="text-lg font-bold text-slate-900 dark:text-white mt-2">
+            600 car. <span className="text-xs font-normal text-slate-400">(overlap 100)</span>
+          </p>
+        </div>
 
-          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm dark:shadow-none">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
-              <Cpu className="w-5 h-5 text-sky-500 dark:text-sky-400" />
-            </div>
-            <h4 className="font-bold text-sm text-slate-900 dark:text-white">Amazon Titan Embeddings v2</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Calcul de vecteurs denses normalisés en <strong>1024 dimensions</strong>. Précision sémantique maximale pour la recherche par similarité cosinus.
-            </p>
+        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-none">
+          <div className="flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
+            <Cpu className="w-4 h-4 text-sky-500" />
+            <span>Embedding</span>
           </div>
+          <p className="text-lg font-bold text-slate-900 dark:text-white mt-2">
+            Titan Text v2 <span className="text-xs font-normal text-slate-400">(1024d)</span>
+          </p>
+        </div>
 
-          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm dark:shadow-none">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <Server className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-            </div>
-            <h4 className="font-bold text-sm text-slate-900 dark:text-white">Indexation HNSW pgvector</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Stockage dans PostgreSQL avec extension <code className="text-emerald-600 dark:text-emerald-400 font-mono">pgvector</code> et index HNSW (<code className="font-mono">vector_cosine_ops</code>) pour des requêtes sub-milliseconde.
-            </p>
+        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-none">
+          <div className="flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
+            <Server className="w-4 h-4 text-emerald-500" />
+            <span>Base Vectorielle</span>
           </div>
+          <p className="text-lg font-bold text-slate-900 dark:text-white mt-2">
+            pgvector <span className="text-xs font-normal text-slate-400">(HNSW)</span>
+          </p>
         </div>
       </div>
     </div>

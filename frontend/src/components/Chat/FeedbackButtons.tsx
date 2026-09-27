@@ -57,7 +57,7 @@ export const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({ traceId, initi
       {selected !== null && (
         <span className="text-[10px] text-slate-500 flex items-center gap-1 ml-1 font-mono">
           <Check className="w-3 h-3 text-emerald-400" />
-          Feedback synchronisé avec Langfuse
+          Enregistré
         </span>
       )}
     </div>
