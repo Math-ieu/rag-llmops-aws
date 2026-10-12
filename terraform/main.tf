@@ -81,3 +81,11 @@ module "app_runner" {
   langfuse_public_key     = var.langfuse_public_key
   langfuse_secret_key     = var.langfuse_secret_key
 }
+
+# 7. Frontend React (S3 + Distribution CDN CloudFront)
+module "frontend" {
+  source       = "./modules/frontend_s3_cloudfront"
+  project_name = var.project_name
+  environment  = var.environment
+}
+

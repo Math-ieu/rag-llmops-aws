@@ -25,13 +25,15 @@ Conçue selon les standards d'ingénierie logicielle les plus stricts, elle fusi
 
 ```mermaid
 flowchart TD
-    subgraph Client["Frontend & Ingestion"]
+    subgraph Client["Frontend Hébergé sur AWS (S3 + CloudFront)"]
+        CF[Amazon CloudFront CDN - HTTPS]
+        S3Front[(Bucket S3 Frontend React)]
         UI[Interface Utilisateur React + Tailwind CSS]
         DocUpload[Documents PDF / Markdown]
     end
 
     subgraph AWS_Cloud["AWS Infrastructure (Terraform)"]
-        ALB[AWS App Runner / ALB HTTPS]
+        ALB[AWS App Runner / HTTPS API]
         FastAPI[Backend FastAPI Python 3.12]
         
         subgraph Storage["Persistance & Données"]
@@ -61,6 +63,8 @@ flowchart TD
         Gate{Fidélité >= 0.85 ?}
     end
 
+    CF <--> S3Front
+    CF --> UI
     DocUpload --> S3
     UI <-->|Streaming SSE| ALB
     ALB <--> FastAPI
@@ -111,7 +115,7 @@ flowchart TD
 | **Infrastructure as Code (IaC)** | Terraform v1.8+ (VPC multi-AZ, RDS pgvector, S3, IAM, App Runner, CloudWatch) |
 | **Base de Données Vectorielle** | PostgreSQL 16 + extension `pgvector` (Index HNSW) |
 | **Backend & API** | Python 3.12, FastAPI, Pydantic Settings, Boto3, Rank-BM25, Uvicorn |
-| **Frontend** | React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons |
+| **Frontend** | React 18, Vite, TypeScript, Tailwind CSS, hébergé sur Amazon S3 + CloudFront (CDN) |
 | **Observabilité & Tracing** | Langfuse (OpenTelemetry compatible), AWS CloudWatch, Amazon SNS |
 | **CI/CD & Évaluation** | GitHub Actions, RAGAS, DeepEval, Pytest |
 
