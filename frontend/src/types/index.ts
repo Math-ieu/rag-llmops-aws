@@ -27,10 +27,19 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  timestamp?: string;
   sources?: SourceChunk[];
   traceId?: string;
   metrics?: QueryMetrics;
   feedbackGiven?: number; // 1 for +1, -1 for -1
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: ChatMessage[];
 }
 
 export interface SystemHealth {

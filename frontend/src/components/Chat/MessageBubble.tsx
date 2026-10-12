@@ -59,6 +59,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           )}
         </div>
 
+        {isUser && message.timestamp && (
+          <div className="text-[10px] text-slate-400 font-mono text-right pr-1">
+            {message.timestamp}
+          </div>
+        )}
+
         {!isUser && message.sources && message.sources.length > 0 && (
           <div className="space-y-1.5 pt-1">
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -75,6 +81,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
         {!isUser && (
           <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 font-mono pt-1">
+            {message.timestamp && (
+              <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
+                <Clock className="w-3 h-3" />
+                {message.timestamp}
+              </span>
+            )}
             {message.metrics && (
               <>
                 <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700/80">
