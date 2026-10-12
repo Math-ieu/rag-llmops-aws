@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, Cloud, Sun, Moon, MessageSquare, UploadCloud, Activity } from 'lucide-react';
+import { Database, Sun, Moon, MessageSquare, UploadCloud, Activity } from 'lucide-react';
 import { SystemHealth } from '../types';
 
 interface NavbarProps {
@@ -20,16 +20,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0d131f]/95 backdrop-blur px-6 sm:px-8 lg:px-10 flex items-center justify-between sticky top-0 z-40 transition-colors duration-200 shadow-sm dark:shadow-none relative">
       {/* Brand - Left */}
-      <div className="flex items-center gap-3 z-10">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/20 shrink-0">
-          <Cloud className="w-4 h-4 text-white" />
-        </div>
-        <div className="flex items-center gap-2">
-          <h1 className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">RAG Platform</h1>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 font-mono font-medium">
-            Bedrock
-          </span>
-        </div>
+      <div className="flex items-center z-10">
+        <h1 className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">
+          Kortex
+        </h1>
       </div>
 
       {/* Tabs - Centered mathematically in the navbar */}
