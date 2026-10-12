@@ -102,6 +102,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ messages, setMessages })
       (err) => {
         setIsStreaming(false);
         setError("Erreur de connexion lors de la requête RAG.");
+        setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId || msg.content.trim().length > 0));
         console.error(err);
       }
     );

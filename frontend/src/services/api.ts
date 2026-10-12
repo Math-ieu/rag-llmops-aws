@@ -1,6 +1,6 @@
 import { SystemHealth, IndexedDocument } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://piajqcbwp3.eu-west-3.awsapprunner.com';
 
 export async function fetchSystemHealth(): Promise<SystemHealth> {
   const res = await fetch(`${API_BASE}/api/system/health`);
