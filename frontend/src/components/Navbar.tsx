@@ -1,9 +1,7 @@
 import React from 'react';
-import { Database, Sun, Moon, MessageSquare, UploadCloud, Activity } from 'lucide-react';
-import { SystemHealth } from '../types';
+import { Sun, Moon, MessageSquare, UploadCloud, Activity } from 'lucide-react';
 
 interface NavbarProps {
-  health: SystemHealth | null;
   activeTab: 'chat' | 'ingest' | 'observability';
   setActiveTab: (tab: 'chat' | 'ingest' | 'observability') => void;
   theme: 'light' | 'dark';
@@ -11,7 +9,6 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  health,
   activeTab,
   setActiveTab,
   theme,
@@ -67,17 +64,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-3.5 z-10 ml-auto">
-        <div className="hidden sm:flex items-center gap-4 text-xs font-mono text-slate-500 dark:text-slate-400 mr-1">
-          <div className="flex items-center gap-1.5">
-            <Database className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span className="font-medium">{health ? `${health.total_chunks_indexed} chunks` : 'Chargement...'}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-slate-700 dark:text-slate-300 font-semibold">{health ? health.aws_region : 'us-east-1'}</span>
-          </div>
-        </div>
-
         {/* Bouton Toggle Light / Dark */}
         <button
           onClick={toggleTheme}
