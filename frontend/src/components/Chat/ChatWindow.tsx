@@ -1,13 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Send, 
-  Sparkles, 
   RefreshCw, 
   AlertCircle, 
-  MessageSquare, 
   Plus, 
   Trash2, 
-  Clock, 
   PanelLeftClose, 
   PanelLeft 
 } from 'lucide-react';
@@ -18,6 +14,17 @@ import { sendQueryStream } from '../../services/api';
 const SESSIONS_STORAGE_KEY = 'rag_chat_sessions_v1';
 const ACTIVE_SESSION_STORAGE_KEY = 'rag_active_session_id';
 const SIDEBAR_STORAGE_KEY = 'rag_chat_sidebar_open';
+
+const BADGE_COLORS = [
+  'bg-blue-600 text-white',
+  'bg-orange-600 text-white',
+  'bg-purple-600 text-white',
+  'bg-amber-600 text-white',
+  'bg-teal-600 text-white',
+  'bg-rose-600 text-white',
+  'bg-emerald-600 text-white',
+  'bg-indigo-600 text-white',
+];
 
 const formatSessionDate = (isoStr: string): string => {
   try {
@@ -52,7 +59,6 @@ interface ChatWindowProps {
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = () => {
-  // Chargement des sessions depuis le localStorage
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
     try {
       const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
@@ -87,7 +93,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Sauvegarde automatique des sessions dans le localStorage
   useEffect(() => {
     try {
       localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
@@ -119,7 +124,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
 
   const handleNewSession = () => {
     if (isStreaming) return;
-    if (currentMessages.length === 0) return; // Déjà une session vierge
+    if (currentMessages.length === 0) return;
     const newSession = createEmptySession();
     setSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newSession.id);
@@ -182,7 +187,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
       sources: [],
     };
 
-    // Calcul du titre de discussion automatique au 1er message
     const isFirstMsg = currentMessages.length === 0;
     const sessionTitle = isFirstMsg 
       ? (textToSend.length > 36 ? textToSend.slice(0, 36) + '…' : textToSend)
@@ -307,83 +311,88 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
   ];
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-slate-50 dark:bg-[#0b0f17] transition-colors duration-200 overflow-hidden">
-      {/* Sidebar Historique des Discussions */}
+    <div className="flex h-[calc(100vh-5.75rem)] bg-[#f6f6f4] dark:bg-[#0e1015] transition-colors overflow-hidden">
+      {/* 1. Sidebar Historique Numéroté */}
       <aside
         className={`${
           sidebarOpen ? 'w-72 sm:w-80' : 'w-0'
-        } transition-all duration-300 ease-in-out border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d131f] flex flex-col shrink-0 overflow-hidden relative`}
+        } transition-all duration-200 border-r border-neutral-300 dark:border-neutral-800 bg-white dark:bg-[#0c0f17] flex flex-col shrink-0 overflow-hidden relative`}
       >
-        <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+        {/* En-tête Sidebar : Bouton Action Brutaliste */}
+        <div className="p-3 border-b border-neutral-300 dark:border-neutral-800 flex items-center justify-between gap-2">
           <button
             onClick={handleNewSession}
             disabled={isStreaming}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold shadow-sm transition-all disabled:opacity-50"
+            className="flex-1 py-1.5 px-3 bg-black hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black font-mono font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Nouvelle discussion</span>
           </button>
           <button
             onClick={() => setSidebarOpen(false)}
             title="Masquer l'historique"
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+            className="p-1.5 border border-neutral-300 dark:border-neutral-700 text-neutral-500 hover:text-black dark:hover:text-white"
           >
-            <PanelLeftClose className="w-4 h-4" />
+            <PanelLeftClose className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Titre et compteur */}
-        <div className="px-4 pt-3 pb-2 flex items-center justify-between text-[11px] font-mono text-slate-400 uppercase tracking-wider">
-          <span>Historique</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px]">
-            {sessions.length}
-          </span>
+        {/* Section Header */}
+        <div className="px-3.5 py-2 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-400 border-b border-neutral-200 dark:border-neutral-800/60">
+          <span>01 / HISTORIQUE</span>
+          <span>{sessions.length} SESSIONS</span>
         </div>
 
-        {/* Liste des discussions */}
-        <div className="flex-1 overflow-y-auto px-2.5 py-1 space-y-1">
-          {sessions.map((session) => {
+        {/* Liste des Discussions Numérotées */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+          {sessions.map((session, idx) => {
             const isActive = session.id === currentSession.id;
+            const badgeColor = BADGE_COLORS[idx % BADGE_COLORS.length];
+            const formattedIndex = String(idx + 1).padStart(2, '0');
+
             return (
               <div
                 key={session.id}
                 onClick={() => handleSelectSession(session.id)}
-                className={`group relative flex items-start gap-2.5 p-2.5 rounded-xl cursor-pointer text-xs transition-all ${
+                className={`group relative p-2.5 border cursor-pointer transition-colors ${
                   isActive
-                    ? 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-500/30 font-medium'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent'
+                    ? 'border-black dark:border-white bg-neutral-100 dark:bg-neutral-900'
+                    : 'border-neutral-200 dark:border-neutral-800/80 hover:border-neutral-400 dark:hover:border-neutral-600 bg-white dark:bg-[#0c0f17]'
                 }`}
               >
-                <MessageSquare className={`w-4 h-4 shrink-0 mt-0.5 ${isActive ? 'text-orange-500' : 'text-slate-400'}`} />
-                <div className="flex-1 min-w-0 pr-6">
-                  <p className="truncate font-semibold text-slate-900 dark:text-white">
-                    {session.title}
-                  </p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 flex items-center gap-1">
-                    <Clock className="w-2.5 h-2.5" />
-                    <span>{formatSessionDate(session.createdAt)}</span>
-                  </p>
+                <div className="flex items-start gap-2.5">
+                  <span className={`font-mono text-[9px] font-black px-1 py-0.5 shrink-0 ${badgeColor}`}>
+                    {formattedIndex}
+                  </span>
+                  <div className="flex-1 min-w-0 pr-5">
+                    <p className="font-bold text-xs text-neutral-900 dark:text-white truncate">
+                      {session.title}
+                    </p>
+                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5 uppercase">
+                      {formatSessionDate(session.createdAt)}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Bouton de suppression */}
+                {/* Bouton de Suppression */}
                 <button
                   onClick={(e) => handleDeleteSession(e, session.id)}
                   title="Supprimer la discussion"
-                  className="absolute right-2 top-2.5 p-1 rounded-md opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+                  className="absolute right-2 top-2 p-1 text-neutral-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-3 h-3" />
                 </button>
               </div>
             );
           })}
         </div>
 
-        {/* Bas de sidebar */}
+        {/* Bas de Sidebar */}
         {sessions.length > 1 && (
-          <div className="p-3 border-t border-slate-200 dark:border-slate-800 text-center">
+          <div className="p-2.5 border-t border-neutral-300 dark:border-neutral-800 text-center">
             <button
               onClick={handleClearAll}
-              className="text-[11px] text-slate-400 hover:text-rose-500 font-mono transition-colors"
+              className="text-[10px] font-mono uppercase text-neutral-400 hover:text-rose-600 transition-colors"
             >
               Effacer tout l’historique
             </button>
@@ -391,72 +400,65 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
         )}
       </aside>
 
-      {/* Zone Principale de Chat */}
-      <div className="flex-1 flex flex-col h-full min-w-0">
-        {/* Barre d'en-tête du Chat */}
-        <div className="px-6 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-[#0b0f17]/80 backdrop-blur-md flex items-center justify-between text-xs font-mono">
-          <div className="flex items-center gap-3 truncate">
+      {/* 2. Zone Principale de Chat */}
+      <div className="flex-1 flex flex-col h-full min-w-0 bg-[#f6f6f4] dark:bg-[#0e1015]">
+        {/* Barre Supérieure du Chat */}
+        <div className="h-9 px-4 sm:px-6 border-b border-neutral-300 dark:border-neutral-800 bg-white dark:bg-[#0c0f17] flex items-center justify-between text-[11px] font-mono uppercase tracking-wider select-none shrink-0">
+          <div className="flex items-center gap-2 truncate">
             {!sidebarOpen && (
               <button
                 onClick={() => setSidebarOpen(true)}
                 title="Afficher l'historique"
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-500 hover:border-orange-500/40 transition-colors flex items-center gap-1.5"
+                className="p-1 border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white flex items-center gap-1"
               >
-                <PanelLeft className="w-4 h-4" />
-                <span className="hidden sm:inline font-sans text-xs">Historique</span>
+                <PanelLeft className="w-3 h-3" />
+                <span className="text-[10px] hidden sm:inline">HISTORIQUE</span>
               </button>
             )}
-            <span className="text-slate-400 dark:text-slate-500 hidden sm:inline">&bull;</span>
-            <span className="truncate text-slate-700 dark:text-slate-300 font-sans font-medium">
-              {currentSession.title}
+            <span className="font-bold text-neutral-900 dark:text-white truncate">
+              01 / {currentSession.title}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0 text-slate-400">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-slate-400" />
-              <span>{formatSessionDate(currentSession.createdAt)}</span>
-            </span>
-            <button
-              onClick={handleNewSession}
-              disabled={isStreaming}
-              title="Nouvelle discussion"
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-orange-500 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+          <div className="flex items-center gap-3 text-neutral-400 text-[10px]">
+            <span>{formatSessionDate(currentSession.createdAt)}</span>
+            <span className="hidden md:inline">•</span>
+            <span className="hidden md:inline text-neutral-700 dark:text-neutral-300">CLAUDE 3.5 // 1024D</span>
           </div>
         </div>
 
         {/* Messages Scroll Area */}
-        <div className="flex-1 overflow-y-auto px-6 lg:px-10 py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-6">
           {currentMessages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-xl mx-auto space-y-5 py-12">
-              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 dark:text-orange-400 shadow-sm">
-                <Sparkles className="w-7 h-7" />
+            <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto space-y-4 py-12">
+              <div className="w-10 h-10 border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-mono font-black text-sm">
+                RAG
               </div>
               <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                  Assistant RAG
+                <h2 className="text-base font-bold text-neutral-900 dark:text-white uppercase font-mono tracking-wider">
+                  Recherche RAG & Synthèse
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Posez votre question.
+                <p className="text-xs text-neutral-500 font-mono">
+                  Posez une question sur les documents indexés.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center pt-1">
+
+              {/* Suggestions en cartes techniques */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 w-full">
                 {suggestions.map((s, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSend(s)}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-orange-500/50 hover:text-orange-600 dark:hover:text-white transition-all text-left shadow-sm"
+                    className="p-2.5 border border-neutral-300 dark:border-neutral-800 bg-white dark:bg-[#0c0f17] text-left text-xs font-mono uppercase text-neutral-800 dark:text-neutral-200 hover:border-black dark:hover:border-white transition-colors"
                   >
-                    {s}
+                    <span className="text-[10px] text-neutral-400 block">0{idx + 1} / QUESTION</span>
+                    <span className="font-bold truncate block">{s}</span>
                   </button>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="space-y-6">
               {currentMessages.map((m) => (
                 <MessageBubble key={m.id} message={m} />
               ))}
@@ -465,41 +467,41 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Box */}
-        <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d131f] p-4 sm:p-5 transition-colors duration-200">
+        {/* Input Box Brutaliste */}
+        <div className="border-t border-neutral-300 dark:border-neutral-800 bg-white dark:bg-[#0c0f17] p-3 sm:p-4 shrink-0">
           <div className="max-w-4xl mx-auto space-y-2">
             {error && (
-              <div className="flex items-center gap-2 text-xs text-rose-500 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+              <div className="flex items-center gap-2 text-xs font-mono text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 p-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span className="uppercase">{error}</span>
               </div>
             )}
 
-            <div className="relative flex items-center bg-slate-50 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 rounded-2xl overflow-hidden focus-within:border-orange-500 shadow-sm dark:shadow-lg transition-colors">
+            <div className="border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 flex items-center focus-within:border-black dark:focus-within:border-white transition-colors">
+              <span className="pl-3.5 pr-1 font-mono text-xs text-neutral-400 font-bold select-none">&gt;</span>
               <textarea
                 rows={1}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Posez votre question..."
+                placeholder="SAISISSEZ VOTRE QUESTION..."
                 disabled={isStreaming}
-                className="w-full bg-transparent px-5 py-4 text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none resize-none font-sans"
+                className="w-full bg-transparent px-2.5 py-3 text-xs sm:text-sm font-mono text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none resize-none uppercase"
               />
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isStreaming}
-                className="mr-3 p-2.5 rounded-xl bg-orange-500 text-white disabled:opacity-30 disabled:hover:bg-orange-500 hover:bg-orange-600 transition-colors shadow-md shrink-0"
+                className="m-1.5 px-4 py-2 bg-black hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black font-mono font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-30 shrink-0 flex items-center gap-1.5"
               >
                 {isStreaming ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <Send className="w-5 h-5" />
+                  <>
+                    <span>ENVOYER</span>
+                    <span className="text-[10px] opacity-70 hidden sm:inline">[↵]</span>
+                  </>
                 )}
               </button>
-            </div>
-            <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 px-2 font-mono">
-              <span>Entrée pour envoyer</span>
-              <span>Streaming SSE</span>
             </div>
           </div>
         </div>

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Database, Cloud, Sun, Moon, MessageSquare, UploadCloud, Activity } from 'lucide-react';
+import { Sun, Moon, Terminal } from 'lucide-react';
 import { SystemHealth } from '../types';
 
 interface NavbarProps {
@@ -18,84 +17,76 @@ export const Navbar: React.FC<NavbarProps> = ({
   toggleTheme,
 }) => {
   return (
-    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0d131f]/95 backdrop-blur px-6 sm:px-8 lg:px-10 flex items-center justify-between sticky top-0 z-40 transition-colors duration-200 shadow-sm dark:shadow-none relative">
+    <header className="h-14 border-b border-neutral-300 dark:border-neutral-800 bg-[#f6f6f4] dark:bg-[#0e1015] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-40 select-none">
       {/* Brand - Left */}
-      <div className="flex items-center gap-3 z-10">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/20 shrink-0">
-          <Cloud className="w-4 h-4 text-white" />
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 font-black text-sm tracking-wider uppercase text-neutral-900 dark:text-white">
+          <Terminal className="w-4 h-4 text-neutral-900 dark:text-white" />
+          <span>RAG // CORE</span>
         </div>
-        <div className="flex items-center gap-2">
-          <h1 className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">RAG Platform</h1>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 font-mono font-medium">
-            Bedrock
-          </span>
+        <div className="hidden md:flex items-center gap-1 font-mono text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-black text-white dark:bg-white dark:text-black">
+          <span>AWS BEDROCK</span>
+          <span className="opacity-60">//</span>
+          <span>LLMOPS</span>
         </div>
       </div>
 
-      {/* Tabs - Centered mathematically in the navbar */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
-        <nav className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/90 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${
-              activeTab === 'chat'
-                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm border border-slate-200/80 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Chat</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('ingest')}
-            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${
-              activeTab === 'ingest'
-                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm border border-slate-200/80 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <UploadCloud className="w-3.5 h-3.5" />
-            <span>Ingestion</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('observability')}
-            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${
-              activeTab === 'observability'
-                ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-sm border border-slate-200/80 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5" />
-            <span>Télémétrie</span>
-          </button>
-        </nav>
-      </div>
+      {/* Tabs - Centered segmented controls */}
+      <nav className="flex items-center border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-0.5 font-mono text-xs">
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`px-3.5 py-1.5 font-bold uppercase tracking-wider transition-all ${
+            activeTab === 'chat'
+              ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          01 Chat
+        </button>
+        <button
+          onClick={() => setActiveTab('ingest')}
+          className={`px-3.5 py-1.5 font-bold uppercase tracking-wider transition-all border-l border-neutral-200 dark:border-neutral-800 ${
+            activeTab === 'ingest'
+              ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          02 Ingestion
+        </button>
+        <button
+          onClick={() => setActiveTab('observability')}
+          className={`px-3.5 py-1.5 font-bold uppercase tracking-wider transition-all border-l border-neutral-200 dark:border-neutral-800 ${
+            activeTab === 'observability'
+              ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm'
+              : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          03 Télémétrie
+        </button>
+      </nav>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3.5 z-10 ml-auto">
-        <div className="hidden sm:flex items-center gap-4 text-xs font-mono text-slate-500 dark:text-slate-400 mr-1">
-          <div className="flex items-center gap-1.5">
-            <Database className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span className="font-medium">{health ? `${health.total_chunks_indexed} chunks` : 'Chargement...'}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-slate-700 dark:text-slate-300 font-semibold">{health ? health.aws_region : 'us-east-1'}</span>
-          </div>
+      <div className="flex items-center gap-2.5 font-mono text-[11px]">
+        <div className="hidden sm:flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+          <span className="px-2 py-1 border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-bold text-neutral-900 dark:text-white">
+              {health ? health.aws_region.toUpperCase() : 'EU-WEST-3'}
+            </span>
+          </span>
+          <span className="px-2 py-1 border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 font-semibold text-neutral-800 dark:text-neutral-200">
+            {health ? `${health.total_chunks_indexed} CHUNKS` : '0 CHUNKS'}
+          </span>
         </div>
 
         {/* Bouton Toggle Light / Dark */}
         <button
           onClick={toggleTheme}
-          aria-label="Basculer mode clair / sombre"
-          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
-          title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+          aria-label="Basculer thème"
+          title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+          className="p-1.5 border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:border-black dark:hover:border-white transition-colors"
         >
-          {theme === 'dark' ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-slate-700" />
-          )}
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-neutral-800" />}
         </button>
       </div>
     </header>

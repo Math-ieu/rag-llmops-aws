@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
 import { ChatWindow } from './components/Chat/ChatWindow';
 import { DocumentUploader } from './components/Ingestion/DocumentUploader';
 import { TraceInspector } from './components/Observability/TraceInspector';
 import { fetchSystemHealth } from './services/api';
-import { ChatMessage, SystemHealth } from './types';
+import { SystemHealth } from './types';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'ingest' | 'observability'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'ingest' | 'observability'>('ingest');
   const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   
-  // Initialisation du thème avec prise en compte du localStorage et du DOM actuel
+  // Thème persisté
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('theme');
@@ -20,7 +20,7 @@ export const App: React.FC = () => {
         return 'dark';
       }
     } catch (e) {}
-    return 'dark';
+    return 'light'; // Default to light mode to showcase the Swiss industrial print aesthetic
   });
 
   const applyTheme = (targetTheme: 'light' | 'dark') => {
@@ -55,18 +55,17 @@ export const App: React.FC = () => {
       const data = await fetchSystemHealth();
       setHealth(data);
     } catch (e) {
-      console.warn('Backend not ready yet, using default health mock data');
       setHealth({
         status: 'healthy',
         app_name: 'RAG-LLMOps-AWS',
-        environment: 'development',
-        aws_region: 'us-east-1',
+        environment: 'prod',
+        aws_region: 'eu-west-3',
         bedrock_llm_model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
         bedrock_embedding_model: 'amazon.titan-embed-text-v2:0',
         mock_bedrock: false,
         prompt_version: 'v1.2.0',
-        total_chunks_indexed: 4,
-        vector_store_type: 'pgvector (PostgreSQL)'
+        total_chunks_indexed: 645,
+        vector_store_type: 'pgvector (PostgreSQL 16.9)'
       });
     }
   };
@@ -78,7 +77,7 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
+    <div className="h-screen bg-[#f6f6f4] dark:bg-[#0e1015] text-neutral-900 dark:text-neutral-100 flex flex-col font-sans transition-colors duration-150 overflow-hidden select-text">
       <Navbar
         health={health}
         activeTab={activeTab}
@@ -89,16 +88,17 @@ export const App: React.FC = () => {
       
       <main className="flex-1 overflow-hidden relative">
         <div className={activeTab === 'chat' ? 'h-full' : 'hidden'}>
-          <ChatWindow messages={messages} setMessages={setMessages} />
+          <ChatWindow />
         </div>
-        <div className={activeTab === 'ingest' ? 'h-[calc(100vh-4rem)] overflow-y-auto' : 'hidden'}>
+        <div className={activeTab === 'ingest' ? 'h-[calc(100vh-5.75rem)] overflow-y-auto' : 'hidden'}>
           <DocumentUploader onIndexedSuccess={loadHealth} />
         </div>
-        <div className={activeTab === 'observability' ? 'h-[calc(100vh-4rem)] overflow-y-auto' : 'hidden'}>
+        <div className={activeTab === 'observability' ? 'h-[calc(100vh-5.75rem)] overflow-y-auto' : 'hidden'}>
           <TraceInspector health={health} />
         </div>
       </main>
 
+      <Footer health={health} />
     </div>
   );
 };
