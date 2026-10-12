@@ -21,10 +21,10 @@ interface DocumentUploaderProps {
 }
 
 const STEPS = [
-  'Lecture du document',
-  'Découpage sémantique (Chunking)',
-  'Vectorisation Titan Embeddings v2',
-  'Indexation HNSW pgvector'
+  'Lecture du fichier',
+  'Archivage Amazon S3',
+  'Vectorisation Titan',
+  'Indexation pgvector'
 ];
 
 export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onIndexedSuccess }) => {
@@ -109,7 +109,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onIndexedSuc
   };
 
   const handleDelete = async (docName: string) => {
-    if (!confirm(`Supprimer "${docName}" de la base vectorielle ?`)) return;
+    if (!confirm(`Supprimer "${docName}" (S3 et base vectorielle) ?`)) return;
     setDeletingDoc(docName);
     try {
       await deleteIndexedDocument(docName);

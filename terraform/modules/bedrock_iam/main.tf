@@ -53,9 +53,23 @@ resource "aws_iam_policy" "bedrock_access" {
           "logs:PutLogEvents"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.project_name}-docs-${var.environment}-*",
+          "arn:aws:s3:::${var.project_name}-docs-${var.environment}-*/*"
+        ]
       }
     ]
   })
+
 }
 
 resource "aws_iam_role_policy_attachment" "attach_bedrock" {

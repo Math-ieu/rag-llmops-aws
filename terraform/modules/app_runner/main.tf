@@ -60,6 +60,7 @@ resource "aws_apprunner_service" "api" {
           "BEDROCK_EMBEDDING_MODEL_ID" = var.bedrock_embedding_model
           "LANGFUSE_PUBLIC_KEY"        = var.langfuse_public_key
           "LANGFUSE_SECRET_KEY"        = var.langfuse_secret_key
+          "DOCUMENTS_S3_BUCKET"        = var.documents_s3_bucket
         }
       }
     }

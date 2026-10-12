@@ -8,6 +8,7 @@ from app.ingestion.loader import DocumentLoader
 from app.ingestion.chunker import TextChunker
 from app.ingestion.vector_store import vector_store
 from app.core.bedrock_client import bedrock_client
+from app.core.s3_storage import s3_storage
 
 router = APIRouter(prefix="/api/ingest", tags=["Document Ingestion"])
 
@@ -54,6 +55,10 @@ async def ingest_file(file: UploadFile = File(...)):
         inserted = vector_store.insert_chunks(chunks, embeddings)
         file_size = os.path.getsize(tmp_path)
         file_type = suffix.lstrip(".").lower()
+
+        # 5. Archivage sur Amazon S3
+        s3_storage.upload_file(tmp_path, file.filename)
+
         vector_store.record_document(
             name=file.filename,
             file_type=file_type,
@@ -80,8 +85,9 @@ async def list_documents():
 
 @router.delete("/documents/{document_name}")
 async def delete_document(document_name: str):
-    """Supprime un document et ses chunks associés de la base vectorielle."""
+    """Supprime un document et ses chunks associés de la base vectorielle et d'Amazon S3."""
     deleted = vector_store.delete_document(document_name)
+    s3_storage.delete_document(document_name)
     total_count = vector_store.count_chunks()
     return {
         "status": "success",
@@ -99,6 +105,10 @@ async def ingest_text(payload: IngestTextRequest):
     chunks = chunker.chunk_documents(docs)
     embeddings = [bedrock_client.get_embedding(c["content"]) for c in chunks]
     inserted = vector_store.insert_chunks(chunks, embeddings)
+
+    # Archivage S3
+    s3_storage.upload_bytes(payload.content.encode("utf-8"), f"{payload.title}.txt")
+
     vector_store.record_document(
         name=payload.title,
         file_type="text",

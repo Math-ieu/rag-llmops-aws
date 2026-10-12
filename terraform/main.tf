@@ -81,6 +81,7 @@ module "app_runner" {
   langfuse_public_key     = var.langfuse_public_key
   langfuse_secret_key     = var.langfuse_secret_key
   image_uri               = var.image_uri
+  documents_s3_bucket     = module.s3_storage.bucket_id
 }
 
 

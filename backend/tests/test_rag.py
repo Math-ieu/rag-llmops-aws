@@ -81,3 +81,10 @@ def test_document_history_and_deletion():
     docs_after = vector_store.get_documents()
     assert not any(d["name"] == "guide_architecture.md" for d in docs_after)
 
+def test_s3_storage_graceful_handling():
+    from app.core.s3_storage import s3_storage
+    # Quand DOCUMENTS_S3_BUCKET n'est pas défini, les opérations retournent False sans lever d'exception
+    assert s3_storage.upload_file("/non/existent/path.txt", "doc.txt") is False
+    assert s3_storage.upload_bytes(b"sample content", "doc.txt") is False
+    assert s3_storage.delete_document("doc.txt") is False
+

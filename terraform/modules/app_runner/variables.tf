@@ -55,3 +55,9 @@ variable "langfuse_secret_key" {
   default   = ""
   sensitive = true
 }
+
+variable "documents_s3_bucket" {
+  type    = string
+  default = ""
+}
+

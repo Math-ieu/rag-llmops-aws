@@ -22,6 +22,7 @@ class Settings(BaseSettings):
         default=False,
         description="Si activé, simule les réponses Bedrock sans appel payant (utile pour tests unitaires/CI)"
     )
+    DOCUMENTS_S3_BUCKET: str = ""
 
     # Database & Vector Store
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/rag_llmops"
