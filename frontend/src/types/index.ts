@@ -45,3 +45,14 @@ export interface SystemHealth {
   total_chunks_indexed: number;
   vector_store_type: string;
 }
+
+export interface IndexedDocument {
+  id: string;
+  name: string;
+  file_type: string;
+  chunks_count: number;
+  file_size_bytes?: number;
+  status: 'indexed' | 'processing' | 'failed';
+  created_at: string;
+}
+

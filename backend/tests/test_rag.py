@@ -65,3 +65,19 @@ def test_llm_judge():
     assert "judge_score" in juge_res
     assert juge_res["judge_score"] >= 3
     assert "verdict" in juge_res
+
+def test_document_history_and_deletion():
+    vector_store.record_document(
+        name="guide_architecture.md",
+        file_type="markdown",
+        chunks_count=3,
+        file_size_bytes=1024,
+        status="indexed"
+    )
+    docs = vector_store.get_documents()
+    assert any(d["name"] == "guide_architecture.md" for d in docs)
+
+    vector_store.delete_document("guide_architecture.md")
+    docs_after = vector_store.get_documents()
+    assert not any(d["name"] == "guide_architecture.md" for d in docs_after)
+

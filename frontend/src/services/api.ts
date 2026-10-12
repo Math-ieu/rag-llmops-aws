@@ -1,10 +1,28 @@
-import { SystemHealth } from '../types';
+import { SystemHealth, IndexedDocument } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export async function fetchSystemHealth(): Promise<SystemHealth> {
   const res = await fetch(`${API_BASE}/api/system/health`);
   if (!res.ok) throw new Error('Impossible de contacter le backend');
+  return res.json();
+}
+
+export async function fetchIndexedDocuments(): Promise<IndexedDocument[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/ingest/documents`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function deleteIndexedDocument(documentName: string): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/ingest/documents/${encodeURIComponent(documentName)}`, {
+    method: 'DELETE'
+  });
+  if (!res.ok) throw new Error('Erreur lors de la suppression');
   return res.json();
 }
 
@@ -29,6 +47,7 @@ export async function uploadDocumentFile(file: File): Promise<any> {
   }
   return res.json();
 }
+
 
 export async function sendQueryStream(
   query: string,

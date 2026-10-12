@@ -87,21 +87,18 @@ export const App: React.FC = () => {
         toggleTheme={toggleTheme}
       />
       
-      <main className="flex-1 overflow-hidden">
-        {activeTab === 'chat' && (
+      <main className="flex-1 overflow-hidden relative">
+        <div className={activeTab === 'chat' ? 'h-full' : 'hidden'}>
           <ChatWindow messages={messages} setMessages={setMessages} />
-        )}
-        {activeTab === 'ingest' && (
-          <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-            <DocumentUploader onIndexedSuccess={loadHealth} />
-          </div>
-        )}
-        {activeTab === 'observability' && (
-          <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-            <TraceInspector health={health} />
-          </div>
-        )}
+        </div>
+        <div className={activeTab === 'ingest' ? 'h-[calc(100vh-4rem)] overflow-y-auto' : 'hidden'}>
+          <DocumentUploader onIndexedSuccess={loadHealth} />
+        </div>
+        <div className={activeTab === 'observability' ? 'h-[calc(100vh-4rem)] overflow-y-auto' : 'hidden'}>
+          <TraceInspector health={health} />
+        </div>
       </main>
+
     </div>
   );
 };

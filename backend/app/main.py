@@ -61,8 +61,16 @@ async def startup_event():
             }])
             embeddings = [bedrock_client.get_embedding(c["content"]) for c in chunks]
             vector_store.insert_chunks(chunks, embeddings)
+            vector_store.record_document(
+                name="Architecture_LLMOps_Overview.md",
+                file_type="markdown",
+                chunks_count=len(chunks),
+                file_size_bytes=len(seed_doc.encode("utf-8")),
+                status="indexed"
+            )
             logger.info(f"Seeded {len(chunks)} default chunks into vector store.")
     except Exception as e:
+
         logger.warning(f"Could not complete startup seed: {e}. FastAPI ready to serve.")
 
 

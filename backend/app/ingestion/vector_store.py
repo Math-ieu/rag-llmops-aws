@@ -14,6 +14,7 @@ class VectorStore:
         self.engine = None
         self.use_memory = False
         self.memory_store: List[Dict[str, Any]] = []
+        self.documents_store: List[Dict[str, Any]] = []
 
         try:
             self.engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
@@ -32,11 +33,39 @@ class VectorStore:
                     CREATE INDEX IF NOT EXISTS idx_chunks_hnsw 
                     ON document_chunks USING hnsw (embedding vector_cosine_ops);
                 """))
+                # Table de suivi de l'historique des documents indexés
+                conn.execute(text("""
+                    CREATE TABLE IF NOT EXISTS indexed_documents (
+                        id VARCHAR(128) PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL UNIQUE,
+                        file_type VARCHAR(32) NOT NULL DEFAULT 'text',
+                        chunks_count INT NOT NULL DEFAULT 0,
+                        file_size_bytes BIGINT DEFAULT 0,
+                        status VARCHAR(32) NOT NULL DEFAULT 'indexed',
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                """))
+                # Synchronisation initiale automatique à partir des chunks existants si la table est vide
+                conn.execute(text("""
+                    INSERT INTO indexed_documents (id, name, file_type, chunks_count, status, created_at)
+                    SELECT 
+                        md5(metadata->>'source') as id,
+                        metadata->>'source' as name,
+                        COALESCE(MIN(metadata->>'file_type'), 'text') as file_type,
+                        COUNT(*) as chunks_count,
+                        'indexed' as status,
+                        CURRENT_TIMESTAMP as created_at
+                    FROM document_chunks
+                    WHERE metadata->>'source' IS NOT NULL
+                    GROUP BY metadata->>'source'
+                    ON CONFLICT (name) DO UPDATE SET chunks_count = EXCLUDED.chunks_count;
+                """))
                 conn.commit()
             logger.info("Successfully connected to PostgreSQL with pgvector enabled.")
         except Exception as e:
             logger.warning(f"PostgreSQL connection failed ({e}). Running in-memory vector store mode.")
             self.use_memory = True
+
 
     def insert_chunks(self, chunks: List[Dict[str, Any]], embeddings: List[List[float]]) -> int:
         """Insère des chunks avec leurs embeddings associés."""
@@ -139,5 +168,105 @@ class VectorStore:
             res = conn.execute(text("SELECT COUNT(*) FROM document_chunks;")).scalar()
             return res or 0
 
+    def record_document(
+        self,
+        name: str,
+        file_type: str = "text",
+        chunks_count: int = 0,
+        file_size_bytes: int = 0,
+        status: str = "indexed"
+    ) -> None:
+        import hashlib
+        import time
+        doc_id = hashlib.md5(name.encode()).hexdigest()
+        now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+        if self.use_memory or not self.engine:
+            existing = next((d for d in self.documents_store if d["name"] == name), None)
+            if existing:
+                existing["chunks_count"] = chunks_count
+                existing["file_size_bytes"] = file_size_bytes
+                existing["status"] = status
+                existing["created_at"] = now_iso
+            else:
+                self.documents_store.insert(0, {
+                    "id": doc_id,
+                    "name": name,
+                    "file_type": file_type,
+                    "chunks_count": chunks_count,
+                    "file_size_bytes": file_size_bytes,
+                    "status": status,
+                    "created_at": now_iso
+                })
+            return
+
+        with self.engine.begin() as conn:
+            conn.execute(
+                text("""
+                    INSERT INTO indexed_documents (id, name, file_type, chunks_count, file_size_bytes, status, created_at)
+                    VALUES (:id, :name, :file_type, :chunks_count, :file_size_bytes, :status, CURRENT_TIMESTAMP)
+                    ON CONFLICT (name) DO UPDATE SET
+                        chunks_count = EXCLUDED.chunks_count,
+                        file_size_bytes = EXCLUDED.file_size_bytes,
+                        status = EXCLUDED.status,
+                        created_at = CURRENT_TIMESTAMP;
+                """),
+                {
+                    "id": doc_id,
+                    "name": name,
+                    "file_type": file_type,
+                    "chunks_count": chunks_count,
+                    "file_size_bytes": file_size_bytes,
+                    "status": status
+                }
+            )
+
+    def get_documents(self) -> List[Dict[str, Any]]:
+        if self.use_memory or not self.engine:
+            return list(self.documents_store)
+
+        with self.engine.connect() as conn:
+            rows = conn.execute(text("""
+                SELECT id, name, file_type, chunks_count, file_size_bytes, status, created_at
+                FROM indexed_documents
+                ORDER BY created_at DESC;
+            """)).fetchall()
+            return [
+                {
+                    "id": str(r[0]),
+                    "name": str(r[1]),
+                    "file_type": str(r[2]),
+                    "chunks_count": int(r[3]),
+                    "file_size_bytes": int(r[4] or 0),
+                    "status": str(r[5]),
+                    "created_at": r[6].isoformat() if hasattr(r[6], "isoformat") else str(r[6])
+                }
+                for r in rows
+            ]
+
+    def delete_document(self, document_name: str) -> int:
+        if self.use_memory or not self.engine:
+            self.memory_store = [
+                c for c in self.memory_store
+                if c.get("metadata", {}).get("source") != document_name
+            ]
+            self.documents_store = [
+                d for d in self.documents_store
+                if d.get("name") != document_name
+            ]
+            return 1
+
+        with self.engine.begin() as conn:
+            conn.execute(
+                text("DELETE FROM document_chunks WHERE metadata->>'source' = :name;"),
+                {"name": document_name}
+            )
+            deleted = conn.execute(
+                text("DELETE FROM indexed_documents WHERE name = :name;"),
+                {"name": document_name}
+            ).rowcount
+        return deleted
+
 
 vector_store = VectorStore()
+

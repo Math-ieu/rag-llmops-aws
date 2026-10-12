@@ -52,6 +52,15 @@ async def ingest_file(file: UploadFile = File(...)):
 
         # 4. Stockage pgvector
         inserted = vector_store.insert_chunks(chunks, embeddings)
+        file_size = os.path.getsize(tmp_path)
+        file_type = suffix.lstrip(".").lower()
+        vector_store.record_document(
+            name=file.filename,
+            file_type=file_type,
+            chunks_count=inserted,
+            file_size_bytes=file_size,
+            status="indexed"
+        )
         total_count = vector_store.count_chunks()
 
         return {
@@ -64,6 +73,22 @@ async def ingest_file(file: UploadFile = File(...)):
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
 
+@router.get("/documents")
+async def list_documents():
+    """Liste tous les documents indexés dans la base vectorielle."""
+    return vector_store.get_documents()
+
+@router.delete("/documents/{document_name}")
+async def delete_document(document_name: str):
+    """Supprime un document et ses chunks associés de la base vectorielle."""
+    deleted = vector_store.delete_document(document_name)
+    total_count = vector_store.count_chunks()
+    return {
+        "status": "success",
+        "deleted_document": document_name,
+        "total_indexed_chunks": total_count
+    }
+
 @router.post("/text", response_model=IngestResponse)
 async def ingest_text(payload: IngestTextRequest):
     """Indexation directe de texte brut avec métadonnées."""
@@ -74,6 +99,13 @@ async def ingest_text(payload: IngestTextRequest):
     chunks = chunker.chunk_documents(docs)
     embeddings = [bedrock_client.get_embedding(c["content"]) for c in chunks]
     inserted = vector_store.insert_chunks(chunks, embeddings)
+    vector_store.record_document(
+        name=payload.title,
+        file_type="text",
+        chunks_count=inserted,
+        file_size_bytes=len(payload.content.encode("utf-8")),
+        status="indexed"
+    )
     total_count = vector_store.count_chunks()
 
     return {
@@ -82,3 +114,4 @@ async def ingest_text(payload: IngestTextRequest):
         "chunks_created": inserted,
         "total_indexed_chunks": total_count
     }
+
