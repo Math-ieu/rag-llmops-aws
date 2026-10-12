@@ -33,6 +33,11 @@ class VectorStore:
                     CREATE INDEX IF NOT EXISTS idx_chunks_hnsw 
                     ON document_chunks USING hnsw (embedding vector_cosine_ops);
                 """))
+                # Index plein-texte GIN pour recherche lexicale rapide
+                conn.execute(text("""
+                    CREATE INDEX IF NOT EXISTS idx_chunks_fts 
+                    ON document_chunks USING gin (to_tsvector('simple', content));
+                """))
                 # Table de suivi de l'historique des documents indexés
                 conn.execute(text("""
                     CREATE TABLE IF NOT EXISTS indexed_documents (
@@ -160,6 +165,45 @@ class VectorStore:
                 }
                 for r in rows
             ]
+
+    def search_lexical(
+        self,
+        query: str,
+        top_k: int = 8
+    ) -> List[Dict[str, Any]]:
+        """Recherche plein-texte PostgreSQL via tsvector / ts_rank."""
+        if self.use_memory or not self.engine:
+            return []
+        try:
+            with self.engine.connect() as conn:
+                sql = text("""
+                    SELECT 
+                        id, 
+                        content, 
+                        metadata, 
+                        ts_rank_cd(to_tsvector('simple', content), plainto_tsquery('simple', :query)) as rank_score
+                    FROM document_chunks
+                    WHERE to_tsvector('simple', content) @@ plainto_tsquery('simple', :query)
+                    ORDER BY rank_score DESC
+                    LIMIT :limit;
+                """)
+                rows = conn.execute(sql, {
+                    "query": query,
+                    "limit": top_k
+                }).fetchall()
+
+                return [
+                    {
+                        "id": r[0],
+                        "content": r[1],
+                        "metadata": json.loads(r[2]) if isinstance(r[2], str) else r[2],
+                        "similarity_score": round(float(r[3]), 4)
+                    }
+                    for r in rows
+                ]
+        except Exception as e:
+            logger.warning(f"Full-text search failed ({e}).")
+            return []
 
     def count_chunks(self) -> int:
         if self.use_memory or not self.engine:

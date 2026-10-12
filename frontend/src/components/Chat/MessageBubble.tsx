@@ -12,6 +12,7 @@ interface MessageBubbleProps {
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user';
   const [copied, setCopied] = useState(false);
+  const [highlightedSource, setHighlightedSource] = useState<number | null>(null);
 
   const handleCopy = async () => {
     try {
@@ -22,6 +23,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       console.error('Failed to copy', err);
     }
   };
+
+  const handleCitationClick = (sourceNum: number) => {
+    setHighlightedSource(sourceNum);
+    const target = document.getElementById(`source-card-${sourceNum}`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const processedContent = !isUser
+    ? message.content.replace(/\[(\d+)\]/g, '[$1](#source-$1)')
+    : message.content;
 
   return (
     <div className={`flex gap-3.5 max-w-4xl w-full ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'} group`}>
@@ -40,7 +53,32 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none shadow-sm dark:shadow-none'
         }`}>
           <div className="prose prose-slate dark:prose-invert prose-base max-w-none break-words">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => {
+                  if (href && href.startsWith('#source-')) {
+                    const num = parseInt(href.replace('#source-', ''), 10);
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => handleCitationClick(num)}
+                        className="inline-flex items-center justify-center px-1.5 py-0.5 mx-0.5 text-xs font-bold rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border border-orange-500/30 transition-all cursor-pointer align-baseline hover:scale-105"
+                        title={`Afficher la source #${num}`}
+                      >
+                        [{num}]
+                      </button>
+                    );
+                  }
+                  return (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">
+                      {children}
+                    </a>
+                  );
+                }
+              }}
+            >
+              {processedContent}
+            </ReactMarkdown>
           </div>
 
           {!isUser && message.content && (
@@ -73,7 +111,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             </div>
             <div className="grid grid-cols-1 gap-1.5">
               {message.sources.map((s, idx) => (
-                <SourceCard key={s.id || idx} source={s} />
+                <SourceCard 
+                  key={s.id || idx} 
+                  source={s} 
+                  index={idx + 1}
+                  highlighted={highlightedSource === (idx + 1)}
+                />
               ))}
             </div>
           </div>

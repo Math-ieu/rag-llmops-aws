@@ -5,10 +5,18 @@ import { SourceChunk } from '../../types';
 interface SourceCardProps {
   source: SourceChunk;
   index?: number;
+  highlighted?: boolean;
 }
 
-export const SourceCard: React.FC<SourceCardProps> = ({ source }) => {
-  const [expanded, setExpanded] = useState(false);
+export const SourceCard: React.FC<SourceCardProps> = ({ source, index, highlighted = false }) => {
+  const [expanded, setExpanded] = useState(highlighted);
+
+  React.useEffect(() => {
+    if (highlighted) {
+      setExpanded(true);
+    }
+  }, [highlighted]);
+
   const score = source.rerank_score ?? source.similarity_score ?? 0;
   const scorePercent = Math.min(100, Math.round(score * 100));
 
@@ -23,7 +31,14 @@ export const SourceCard: React.FC<SourceCardProps> = ({ source }) => {
   };
 
   return (
-    <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 rounded-2xl p-4 text-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-none">
+    <div 
+      id={index ? `source-card-${index}` : undefined}
+      className={`border rounded-2xl p-4 text-sm transition-all shadow-sm dark:shadow-none scroll-mt-20 ${
+        highlighted
+          ? 'border-orange-500 ring-2 ring-orange-500/30 bg-orange-50/40 dark:bg-orange-950/20'
+          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700'
+      }`}
+    >
       <div 
         role="button"
         tabIndex={0}
@@ -38,8 +53,12 @@ export const SourceCard: React.FC<SourceCardProps> = ({ source }) => {
         }}
       >
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-            <FileText className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0 font-bold text-xs text-orange-600 dark:text-orange-400">
+            {index !== undefined ? (
+              <span>#{index}</span>
+            ) : (
+              <FileText className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            )}
           </div>
           <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
             {source.metadata.source} (page {source.metadata.page || 1})

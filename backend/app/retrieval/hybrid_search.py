@@ -26,24 +26,43 @@ class HybridSearchRetriever:
             similarity_threshold=0.25
         )
 
-        # Si pas assez de documents indexés, retourner les résultats denses directement
-        all_chunks = vector_store.memory_store if vector_store.use_memory else dense_results
-        if not all_chunks:
+        # 2. Recherche lexicale / sparse (PostgreSQL Full-Text Search avec fallback BM25)
+        sparse_results: List[Dict[str, Any]] = []
+        if not vector_store.use_memory and vector_store.engine:
+            sparse_results = vector_store.search_lexical(query, top_k=top_k * 2)
+
+        # Fallback BM25 si pas de résultat FTS ou mode mémoire
+        if not sparse_results:
+            all_chunks = vector_store.memory_store if vector_store.use_memory else dense_results
+            if all_chunks:
+                corpus = [chunk["content"] for chunk in all_chunks]
+                tokenized_corpus = [self._tokenize(doc) for doc in corpus]
+                tokenized_query = self._tokenize(query)
+
+                if any(tokenized_query):
+                    try:
+                        bm25 = BM25Okapi(tokenized_corpus)
+                        bm25_scores = bm25.get_scores(tokenized_query)
+                        sparse_ranked = sorted(
+                            zip(all_chunks, bm25_scores),
+                            key=lambda x: x[1],
+                            reverse=True
+                        )
+                        sparse_results = [
+                            {
+                                "id": chunk["id"],
+                                "content": chunk["content"],
+                                "metadata": chunk["metadata"],
+                                "similarity_score": round(float(score), 4)
+                            }
+                            for chunk, score in sparse_ranked[:top_k * 2]
+                            if score > 0
+                        ]
+                    except Exception:
+                        sparse_results = []
+
+        if not dense_results and not sparse_results:
             return []
-
-        # 2. Recherche lexicale BM25
-        corpus = [chunk["content"] for chunk in all_chunks]
-        tokenized_corpus = [self._tokenize(doc) for doc in corpus]
-        tokenized_query = self._tokenize(query)
-
-        bm25 = BM25Okapi(tokenized_corpus)
-        bm25_scores = bm25.get_scores(tokenized_query)
-
-        sparse_ranked = sorted(
-            zip(all_chunks, bm25_scores),
-            key=lambda x: x[1],
-            reverse=True
-        )
 
         # 3. Reciprocal Rank Fusion (RRF)
         rrf_scores: Dict[str, float] = {}
@@ -55,20 +74,15 @@ class HybridSearchRetriever:
             chunk_map[cid] = chunk
             rrf_scores[cid] = rrf_scores.get(cid, 0.0) + (dense_weight / (self.rrf_k + rank + 1))
 
-        # Classement sparse BM25
-        for rank, (chunk, score) in enumerate(sparse_ranked[:top_k * 2]):
+        # Classement sparse (FTS / BM25)
+        sparse_weight = 1.0 - dense_weight
+        for rank, chunk in enumerate(sparse_results):
             cid = chunk["id"]
             if cid not in chunk_map:
-                chunk_map[cid] = {
-                    "id": chunk["id"],
-                    "content": chunk["content"],
-                    "metadata": chunk["metadata"],
-                    "similarity_score": round(float(score), 4)
-                }
-            sparse_weight = 1.0 - dense_weight
+                chunk_map[cid] = chunk
             rrf_scores[cid] = rrf_scores.get(cid, 0.0) + (sparse_weight / (self.rrf_k + rank + 1))
 
-        # Tri final par score fusionné
+        # Tri final par score fusionné RRF
         sorted_ids = sorted(rrf_scores.keys(), key=lambda cid: rrf_scores[cid], reverse=True)
         final_results = []
         for cid in sorted_ids[:top_k]:
