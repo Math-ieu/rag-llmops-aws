@@ -7,6 +7,7 @@ langfuse>=2.20.0
 numpy>=1.26.0
 sqlalchemy>=2.0.0
 pgvector>=0.2.5
+psycopg[binary]>=3.1.18
 psycopg2-binary>=2.9.9
 rank-bm25>=0.2.2
 pypdf>=4.1.0

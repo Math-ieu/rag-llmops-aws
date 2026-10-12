@@ -80,7 +80,9 @@ module "app_runner" {
   bedrock_embedding_model = var.bedrock_embedding_model
   langfuse_public_key     = var.langfuse_public_key
   langfuse_secret_key     = var.langfuse_secret_key
+  image_uri               = var.image_uri
 }
+
 
 # 7. Frontend React (S3 + Distribution CDN CloudFront)
 module "frontend" {

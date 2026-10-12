@@ -42,25 +42,29 @@ app.include_router(metrics_router)
 @app.on_event("startup")
 async def startup_event():
     logger.info(f"Starting {settings.APP_NAME} in [{settings.APP_ENV}] mode.")
-    # Pré-population de démonstration si la base est vide
-    if vector_store.count_chunks() == 0:
-        logger.info("Vector store is empty. Seeding initial LLMOps reference knowledge...")
-        seed_doc = """
-        Plateforme LLMOps et Architecture RAG de Production sur AWS :
-        Le système RAG (Retrieval-Augmented Generation) en entreprise combine une phase d'ingestion documentaire,
-        de vectorisation via Amazon Titan Embeddings v2, et de recherche hybride (dense vectorielle et BM25 textuelle).
-        Les chunks retenus sont ensuite rerankés avant d'être passés au modèle de fondation Claude 3.5 Sonnet sur Amazon Bedrock.
-        La qualité est supervisée en continu grâce à Langfuse (tracing de latence, tokens, coûts en USD et feedback utilisateur)
-        et protégée par un Quality Gate d'évaluation automatisée (métriques de fidélité Faithfulness et LLM-as-a-Judge) dans la CI/CD.
-        """
-        chunker = TextChunker(chunk_size=300, chunk_overlap=50)
-        chunks = chunker.chunk_documents([{
-            "content": seed_doc.strip(),
-            "metadata": {"source": "Architecture_LLMOps_Overview.md", "page": 1}
-        }])
-        embeddings = [bedrock_client.get_embedding(c["content"]) for c in chunks]
-        vector_store.insert_chunks(chunks, embeddings)
-        logger.info(f"Seeded {len(chunks)} default chunks into vector store.")
+    # Pré-population de démonstration si la base est vide (avec tolérance aux pannes)
+    try:
+        if vector_store.count_chunks() == 0:
+            logger.info("Vector store is empty. Seeding initial LLMOps reference knowledge...")
+            seed_doc = """
+            Plateforme LLMOps et Architecture RAG de Production sur AWS :
+            Le système RAG (Retrieval-Augmented Generation) en entreprise combine une phase d'ingestion documentaire,
+            de vectorisation via Amazon Titan Embeddings v2, et de recherche hybride (dense vectorielle et BM25 textuelle).
+            Les chunks retenus sont ensuite rerankés avant d'être passés au modèle de fondation Claude 3.5 Sonnet sur Amazon Bedrock.
+            La qualité est supervisée en continu grâce à Langfuse (tracing de latence, tokens, coûts en USD et feedback utilisateur)
+            et protégée par un Quality Gate d'évaluation automatisée (métriques de fidélité Faithfulness et LLM-as-a-Judge) dans la CI/CD.
+            """
+            chunker = TextChunker(chunk_size=300, chunk_overlap=50)
+            chunks = chunker.chunk_documents([{
+                "content": seed_doc.strip(),
+                "metadata": {"source": "Architecture_LLMOps_Overview.md", "page": 1}
+            }])
+            embeddings = [bedrock_client.get_embedding(c["content"]) for c in chunks]
+            vector_store.insert_chunks(chunks, embeddings)
+            logger.info(f"Seeded {len(chunks)} default chunks into vector store.")
+    except Exception as e:
+        logger.warning(f"Could not complete startup seed: {e}. FastAPI ready to serve.")
+
 
 @app.get("/")
 async def root():

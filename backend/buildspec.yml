@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 747208289816.dkr.ecr.eu-west-3.amazonaws.com
+      - REPOSITORY_URI=747208289816.dkr.ecr.eu-west-3.amazonaws.com/rag-llmops-backend
+      - IMAGE_TAG=latest
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Docker image pushed successfully to $REPOSITORY_URI:$IMAGE_TAG

@@ -53,3 +53,10 @@ variable "langfuse_secret_key" {
   sensitive   = true
   default     = ""
 }
+
+variable "image_uri" {
+  description = "URI de l'image Docker ECR pour App Runner"
+  type        = string
+  default     = "747208289816.dkr.ecr.eu-west-3.amazonaws.com/rag-llmops-backend:latest"
+}
+

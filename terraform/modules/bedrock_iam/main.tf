@@ -9,6 +9,7 @@ resource "aws_iam_role" "app_execution_role" {
         Effect = "Allow"
         Principal = {
           Service = [
+            "tasks.apprunner.amazonaws.com",
             "apprunner.amazonaws.com",
             "ecs-tasks.amazonaws.com"
           ]
@@ -16,6 +17,7 @@ resource "aws_iam_role" "app_execution_role" {
       }
     ]
   })
+
 
   tags = {
     Name = "${var.project_name}-iam-role"
@@ -37,10 +39,10 @@ resource "aws_iam_policy" "bedrock_access" {
           "bedrock:ListFoundationModels"
         ]
         Resource = [
-          "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet*",
-          "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-haiku*",
-          "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0"
+          "arn:aws:bedrock:*::foundation-model/*",
+          "arn:aws:bedrock:*:*:inference-profile/*"
         ]
+
       },
       {
         Effect = "Allow"
