@@ -69,3 +69,31 @@ export interface IndexedDocument {
   created_at: string;
 }
 
+export interface LiveTelemetryMetrics {
+  total_queries: number;
+  avg_latency_ms: number;
+  p95_latency_ms: number;
+  p50_latency_ms: number;
+  avg_cost_usd: number;
+  total_cost_usd: number;
+  cache_hits: number;
+  cache_hit_rate: number;
+  cost_saved_usd: number;
+  faithfulness_score: number;
+  llm_judge_score: number;
+  satisfaction_rate: number;
+  positive_feedback_count: number;
+  negative_feedback_count: number;
+  is_live: boolean;
+  app_name?: string;
+  environment?: string;
+  aws_region?: string;
+  bedrock_llm_model?: string;
+  bedrock_embedding_model?: string;
+  prompt_version?: string;
+  total_chunks_indexed?: number;
+  total_documents_count?: number;
+  vector_store_type?: string;
+  cache_backend?: string;
+}
+

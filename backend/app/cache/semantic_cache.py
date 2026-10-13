@@ -18,7 +18,10 @@ class SemanticCache:
         self.memory_cache: List[Dict[str, Any]] = []
 
         try:
-            self.engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+            db_url = settings.DATABASE_URL
+            if db_url.startswith("postgresql://") and not db_url.startswith("postgresql+"):
+                db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+            self.engine = create_engine(db_url, pool_pre_ping=True)
             with self.engine.connect() as conn:
                 conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
                 conn.execute(text(f"""

@@ -1,4 +1,4 @@
-import { SystemHealth, IndexedDocument } from '../types';
+import { SystemHealth, IndexedDocument, LiveTelemetryMetrics } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://piajqcbwp3.eu-west-3.awsapprunner.com';
 
@@ -168,5 +168,16 @@ export async function deleteConversationFromBackend(id: string): Promise<boolean
     return res.ok;
   } catch {
     return false;
+  }
+}
+
+export async function fetchLiveTelemetry(): Promise<LiveTelemetryMetrics | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/system/telemetry`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch (e) {
+    console.error('Error fetching live telemetry', e);
+    return null;
   }
 }

@@ -205,5 +205,16 @@ def test_semantic_cache_operations():
     assert stats["total_entries"] >= 1
     assert stats["total_hits"] >= 1
 
+def test_live_telemetry_aggregation():
+    from app.db.chat_store import chat_store
+    telemetry_data = chat_store.get_telemetry_metrics()
+    assert "total_queries" in telemetry_data
+    assert "avg_latency_ms" in telemetry_data
+    assert "p95_latency_ms" in telemetry_data
+    assert "avg_cost_usd" in telemetry_data
+    assert "cache_hit_rate" in telemetry_data
+    assert "faithfulness_score" in telemetry_data
+    assert "satisfaction_rate" in telemetry_data
+
 
 
