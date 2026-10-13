@@ -274,8 +274,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
                       traceId: meta.trace_id,
                       sources: meta.sources,
                       metrics: {
-                        total_latency_ms: meta.retrieval_ms,
-                        retrieval_latency_ms: meta.retrieval_ms,
+                        total_latency_ms: meta.retrieval_ms || 0,
+                        retrieval_latency_ms: meta.retrieval_ms || 0,
+                        cache_hit: meta.cache_hit,
+                        cache_similarity: meta.cache_similarity,
+                        guardrail_blocked: meta.guardrail_blocked,
+                        pii_redacted: meta.pii_redacted,
                       },
                     }
                   : msg
@@ -316,6 +320,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
                         total_latency_ms: doneMetrics.total_latency_ms,
                         cost_usd: doneMetrics.cost_usd,
                         output_tokens: doneMetrics.tokens,
+                        cache_hit: doneMetrics.cache_hit !== undefined ? doneMetrics.cache_hit : msg.metrics?.cache_hit,
+                        cache_similarity: doneMetrics.cache_similarity !== undefined ? doneMetrics.cache_similarity : msg.metrics?.cache_similarity,
+                        guardrail_blocked: doneMetrics.guardrail_blocked !== undefined ? doneMetrics.guardrail_blocked : msg.metrics?.guardrail_blocked,
                       },
                     }
                   : msg

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Bot, User, Clock, DollarSign, Layers, Copy, Check } from 'lucide-react';
+import { Bot, User, Clock, DollarSign, Layers, Copy, Check, Zap, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { ChatMessage } from '../../types';
 import { SourceCard } from './SourceCard';
 import { FeedbackButtons } from './FeedbackButtons';
@@ -262,6 +262,30 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             )}
             {message.metrics && (
               <>
+                {message.metrics.cache_hit && (
+                  <span 
+                    className="flex items-center gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold px-2 py-0.5 rounded-md border border-amber-500/30"
+                    title={`Réponse servie depuis le cache sémantique pgvector (0 ms LLM)`}
+                  >
+                    <Zap className="w-3 h-3 fill-amber-500/30" />
+                    Cache Sémantique {message.metrics.cache_similarity ? `(${Math.round(message.metrics.cache_similarity * 100)}%)` : ''}
+                  </span>
+                )}
+                {message.metrics.guardrail_blocked && (
+                  <span className="flex items-center gap-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold px-2 py-0.5 rounded-md border border-rose-500/30">
+                    <ShieldAlert className="w-3 h-3" />
+                    Bloqué Guardrail
+                  </span>
+                )}
+                {message.metrics.pii_redacted && (
+                  <span 
+                    className="flex items-center gap-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium px-2 py-0.5 rounded-md border border-blue-500/20"
+                    title="Informations sensibles (emails, téléphones, tokens) anonymisées"
+                  >
+                    <ShieldCheck className="w-3 h-3" />
+                    PII Masqué
+                  </span>
+                )}
                 <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700/80">
                   <Clock className="w-3 h-3 text-slate-400" />
                   {message.metrics.total_latency_ms} ms

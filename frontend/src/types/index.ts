@@ -21,6 +21,10 @@ export interface QueryMetrics {
   cost_usd?: number;
   model_id?: string;
   prompt_version?: string;
+  cache_hit?: boolean;
+  cache_similarity?: number;
+  guardrail_blocked?: boolean;
+  pii_redacted?: boolean;
 }
 
 export interface ChatMessage {

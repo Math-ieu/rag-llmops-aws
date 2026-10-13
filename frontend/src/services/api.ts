@@ -52,9 +52,24 @@ export async function uploadDocumentFile(file: File): Promise<any> {
 export async function sendQueryStream(
   query: string,
   chatHistory: { role: string; content: string }[],
-  onMetadata: (metadata: { trace_id: string; sources: any[]; retrieval_ms: number }) => void,
+  onMetadata: (metadata: { 
+    trace_id: string; 
+    sources: any[]; 
+    retrieval_ms: number;
+    cache_hit?: boolean;
+    cache_similarity?: number;
+    guardrail_blocked?: boolean;
+    pii_redacted?: boolean;
+  }) => void,
   onToken: (token: string) => void,
-  onDone: (metrics: { total_latency_ms: number; cost_usd: number; tokens: number }) => void,
+  onDone: (metrics: { 
+    total_latency_ms: number; 
+    cost_usd: number; 
+    tokens: number;
+    cache_hit?: boolean;
+    cache_similarity?: number;
+    guardrail_blocked?: boolean;
+  }) => void,
   onError: (err: any) => void
 ): Promise<void> {
   try {

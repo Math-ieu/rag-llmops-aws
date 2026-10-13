@@ -40,5 +40,13 @@ class Settings(BaseSettings):
     ENABLE_CLOUDWATCH_METRICS: bool = False
     CLOUDWATCH_NAMESPACE: str = "LLMOps/RAGPlatform"
 
+    # Phase 4: Semantic Cache & Governance
+    SEMANTIC_CACHE_ENABLED: bool = True
+    SEMANTIC_CACHE_THRESHOLD: float = 0.92  # Cosine similarity threshold for cache hit
+    ENABLE_GUARDRAILS: bool = True
+    MASK_PII: bool = True
+    BEDROCK_GUARDRAIL_ID: str = ""
+    BEDROCK_GUARDRAIL_VERSION: str = "DRAFT"
+
 
 settings = Settings()

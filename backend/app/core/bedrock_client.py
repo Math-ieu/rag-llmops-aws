@@ -85,16 +85,35 @@ class BedrockClient:
         system_config = [{"text": system_prompt}]
 
         try:
-            response = self.client.converse(
-                modelId=settings.BEDROCK_LLM_MODEL_ID,
-                messages=formatted_messages,
-                system=system_config,
-                inferenceConfig={
+            converse_kwargs = {
+                "modelId": settings.BEDROCK_LLM_MODEL_ID,
+                "messages": formatted_messages,
+                "system": system_config,
+                "inferenceConfig": {
                     "temperature": temperature,
                     "maxTokens": max_tokens,
                 }
-            )
+            }
+            if settings.BEDROCK_GUARDRAIL_ID:
+                converse_kwargs["guardrailConfig"] = {
+                    "guardrailIdentifier": settings.BEDROCK_GUARDRAIL_ID,
+                    "guardrailVersion": settings.BEDROCK_GUARDRAIL_VERSION or "DRAFT",
+                    "trace": "enabled"
+                }
+
+            response = self.client.converse(**converse_kwargs)
             latency_ms = int((time.time() - start_time) * 1000)
+            
+            # Vérification de l'intervention éventuelle d'un Guardrail Bedrock
+            if response.get("stopReason") == "guardrail_intervened":
+                return {
+                    "text": "Cette réponse a été modérée par Amazon Bedrock Guardrails.",
+                    "usage": response.get("usage", {}),
+                    "latency_ms": latency_ms,
+                    "model_id": settings.BEDROCK_LLM_MODEL_ID,
+                    "guardrail_intervened": True
+                }
+
             output_message = response["output"]["message"]["content"][0]["text"]
             usage = response.get("usage", {})
 
@@ -138,12 +157,19 @@ class BedrockClient:
         system_config = [{"text": system_prompt}]
 
         try:
-            response = self.client.converse_stream(
-                modelId=settings.BEDROCK_LLM_MODEL_ID,
-                messages=formatted_messages,
-                system=system_config,
-                inferenceConfig={"temperature": temperature, "maxTokens": max_tokens}
-            )
+            stream_kwargs = {
+                "modelId": settings.BEDROCK_LLM_MODEL_ID,
+                "messages": formatted_messages,
+                "system": system_config,
+                "inferenceConfig": {"temperature": temperature, "maxTokens": max_tokens}
+            }
+            if settings.BEDROCK_GUARDRAIL_ID:
+                stream_kwargs["guardrailConfig"] = {
+                    "guardrailIdentifier": settings.BEDROCK_GUARDRAIL_ID,
+                    "guardrailVersion": settings.BEDROCK_GUARDRAIL_VERSION or "DRAFT"
+                }
+
+            response = self.client.converse_stream(**stream_kwargs)
             stream = response.get("stream")
             if stream:
                 for event in stream:

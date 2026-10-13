@@ -7,6 +7,7 @@ from app.api.routes_ingest import router as ingest_router
 from app.api.routes_feedback import router as feedback_router
 from app.api.routes_metrics import router as metrics_router
 from app.api.routes_conversations import router as conversations_router
+from app.api.routes_governance import router as governance_router
 from app.ingestion.vector_store import vector_store
 from app.core.bedrock_client import bedrock_client
 from app.ingestion.chunker import TextChunker
@@ -40,6 +41,7 @@ app.include_router(ingest_router)
 app.include_router(feedback_router)
 app.include_router(metrics_router)
 app.include_router(conversations_router)
+app.include_router(governance_router)
 
 @app.on_event("startup")
 async def startup_event():
