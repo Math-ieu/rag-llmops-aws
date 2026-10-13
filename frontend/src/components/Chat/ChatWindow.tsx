@@ -455,17 +455,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
         {/* Barre d'en-tête du Chat */}
         <div className="px-6 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-[#0b0f17]/80 backdrop-blur-md flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-3 truncate">
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                title="Afficher l'historique"
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-500 hover:border-orange-500/40 transition-colors flex items-center gap-1.5"
-              >
-                <PanelLeft className="w-4 h-4" />
-                <span className="hidden sm:inline font-sans text-xs">Historique</span>
-              </button>
+            {!sidebarOpen ? (
+              <>
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  title="Afficher l'historique"
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-500 hover:border-orange-500/40 transition-colors flex items-center gap-1.5"
+                >
+                  <PanelLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline font-sans text-xs">Historique</span>
+                </button>
+                <span className="text-slate-400 dark:text-slate-500 hidden sm:inline">&bull;</span>
+              </>
+            ) : (
+              <MessageSquare className="w-3.5 h-3.5 text-orange-500 shrink-0 hidden sm:inline" />
             )}
-            <span className="text-slate-400 dark:text-slate-500 hidden sm:inline">&bull;</span>
             <span className="truncate text-slate-700 dark:text-slate-300 font-sans font-medium">
               {currentSession.title}
             </span>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Bot, User, Clock, DollarSign, Layers, Copy, Check } from 'lucide-react';
 import { ChatMessage } from '../../types';
 import { SourceCard } from './SourceCard';
@@ -32,15 +33,48 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     }
   };
 
-  const processedContent = !isUser
-    ? message.content.replace(/\[(\d+)\]/g, '[$1](#source-$1)')
-    : message.content;
+  const handleNamedSourceClick = (sourceName: string) => {
+    if (!message.sources || message.sources.length === 0) return;
+    const cleanTarget = sourceName.toLowerCase();
+    const foundIdx = message.sources.findIndex((s) => {
+      const sName = (s.metadata?.source || '').toLowerCase();
+      return sName.includes(cleanTarget) || cleanTarget.includes(sName);
+    });
+    if (foundIdx !== -1) {
+      handleCitationClick(foundIdx + 1);
+    }
+  };
+
+  // Normalisation du Markdown (tableaux tronqués et citations)
+  const formatMarkdownContent = (rawText: string): string => {
+    if (isUser) return rawText;
+
+    let text = rawText;
+
+    // 1. Réparation des tableaux avec double pipe "||" collés sans saut de ligne
+    text = text.replace(/\|\s*\|\s*(\-{3,})/g, '|\n| $1');
+    text = text.replace(/\|\s*\|\s*([A-Za-z0-9\-\:\[])/g, '|\n| $1');
+
+    // 2. Remplacement des citations textuelles [Source: document.pdf, Page 15]
+    text = text.replace(/\[Source:\s*([^,\]]+)(?:,\s*(?:Page|p\.)\s*(\d+))?\]/gi, (_match, src, page) => {
+      const cleanSrc = src.trim();
+      const pageStr = page ? ` (p. ${page.trim()})` : '';
+      return `[📄 ${cleanSrc}${pageStr}](#source-named-${encodeURIComponent(cleanSrc)})`;
+    });
+
+    // 3. Remplacement des citations numériques [1], [2]
+    text = text.replace(/\[(\d+)\]/g, '[$1](#source-$1)');
+
+    return text;
+  };
+
+  const processedContent = formatMarkdownContent(message.content);
 
   return (
     <div className={`flex gap-3.5 max-w-4xl w-full ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'} group`}>
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-sm transition-transform duration-150 ${
         isUser
-          ? 'bg-indigo-600 text-white'
+          ? 'bg-slate-900 dark:bg-slate-800 text-white border border-slate-800 dark:border-slate-700'
           : 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 dark:border-orange-500/30'
       }`}>
         {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
@@ -49,13 +83,109 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       <div className={`space-y-2 overflow-hidden flex-1 ${isUser ? 'items-end' : 'items-start'}`}>
         <div className={`relative px-5 py-4 rounded-2xl text-base leading-relaxed transition-colors duration-200 ${
           isUser 
-            ? 'bg-indigo-600 text-white rounded-tr-none shadow-sm ml-auto max-w-2xl' 
+            ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 rounded-tr-none shadow-sm ml-auto max-w-2xl border border-slate-800 dark:border-slate-700' 
             : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none shadow-sm dark:shadow-none'
         }`}>
           <div className="prose prose-slate dark:prose-invert prose-base max-w-none break-words">
             <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
               components={{
+                table: ({ children }) => (
+                  <div className="my-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900/60">
+                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs sm:text-sm">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 font-bold uppercase tracking-wider text-[11px]">
+                    {children}
+                  </thead>
+                ),
+                tbody: ({ children }) => (
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    {children}
+                  </tbody>
+                ),
+                tr: ({ children }) => (
+                  <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    {children}
+                  </tr>
+                ),
+                th: ({ children }) => (
+                  <th className="px-4 py-3 text-left font-bold whitespace-nowrap">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
+                    {children}
+                  </td>
+                ),
+                h1: ({ children }) => (
+                  <h1 className="text-lg font-bold text-slate-900 dark:text-white mt-4 mb-2 pb-1 border-b border-slate-200 dark:border-slate-800">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white mt-3.5 mb-1.5 flex items-center gap-1.5">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mt-3 mb-1">
+                    {children}
+                  </h3>
+                ),
+                p: ({ children }) => (
+                  <p className="leading-relaxed mb-2.5 last:mb-0">
+                    {children}
+                  </p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="my-2.5 space-y-1 list-disc list-inside text-slate-800 dark:text-slate-200">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="my-2.5 space-y-1 list-decimal list-inside text-slate-800 dark:text-slate-200">
+                    {children}
+                  </ol>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-orange-500 bg-orange-500/5 dark:bg-orange-950/20 px-3.5 py-2 rounded-r-xl my-3 text-slate-700 dark:text-slate-300 italic text-sm">
+                    {children}
+                  </blockquote>
+                ),
+                code: ({ className, children }) => {
+                  const isInline = !className;
+                  if (isInline) {
+                    return (
+                      <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-orange-600 dark:text-orange-400 font-mono text-xs border border-slate-200 dark:border-slate-700">
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <div className="my-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-100 shadow-sm">
+                      <pre>{children}</pre>
+                    </div>
+                  );
+                },
                 a: ({ href, children }) => {
+                  if (href && href.startsWith('#source-named-')) {
+                    const docName = decodeURIComponent(href.replace('#source-named-', ''));
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => handleNamedSourceClick(docName)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 text-xs font-semibold rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 border border-orange-500/30 transition-all cursor-pointer align-baseline hover:scale-105"
+                        title={`Voir l'extrait de ${docName}`}
+                      >
+                        {children}
+                      </button>
+                    );
+                  }
                   if (href && href.startsWith('#source-')) {
                     const num = parseInt(href.replace('#source-', ''), 10);
                     return (
