@@ -178,7 +178,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onIndexedSuc
           Déposez un fichier ici
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          PDF, Markdown, TXT (max 20 Mo)
+          PDF, Word (DOCX), Excel (XLSX), CSV, JSON, Markdown, TXT (max 20 Mo)
         </p>
 
         <div className="mt-5 flex justify-center">
@@ -186,7 +186,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onIndexedSuc
             <span>Sélectionner un fichier</span>
             <input
               type="file"
-              accept=".pdf,.md,.txt,.markdown"
+              accept=".pdf,.docx,.xlsx,.xlsm,.csv,.json,.md,.txt,.markdown"
               onChange={handleFileChange}
               disabled={uploading}
               className="hidden"

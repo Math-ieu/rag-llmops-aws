@@ -111,4 +111,49 @@ def test_chat_store_persistence():
     assert deleted is True
     assert chat_store.get_conversation(conv_id) is None
 
+def test_semantic_chunker_section_detection():
+    chunker = TextChunker(chunk_size=300, chunk_overlap=30)
+    structured_text = """# Architecture Système
+Ce document décrit l'architecture de la plateforme RAG.
+
+## Modèle de Données
+Les données vectorielles sont stockées dans PostgreSQL via pgvector.
+"""
+    docs = [{"content": structured_text, "metadata": {"source": "arch.md", "page": 1}}]
+    chunks = chunker.chunk_documents(docs)
+    assert len(chunks) >= 2
+    assert any("Architecture" in c["metadata"].get("section", "") for c in chunks)
+    assert any("Modèle" in c["metadata"].get("section", "") for c in chunks)
+
+def test_multi_format_loaders(tmp_path):
+    from app.ingestion.loader import DocumentLoader
+    import zipfile
+
+    # 1. Test CSV
+    csv_file = tmp_path / "data.csv"
+    csv_file.write_text("id,name,role\n1,Alice,Admin\n2,Bob,User\n", encoding="utf-8")
+    csv_docs = DocumentLoader.load_file(str(csv_file))
+    assert len(csv_docs) == 1
+    assert "Alice" in csv_docs[0]["content"]
+    assert csv_docs[0]["metadata"]["file_type"] == "csv"
+
+    # 2. Test JSON
+    json_file = tmp_path / "config.json"
+    json_file.write_text('{"service": "Kortex", "version": "1.3.0"}', encoding="utf-8")
+    json_docs = DocumentLoader.load_file(str(json_file))
+    assert len(json_docs) == 1
+    assert "Kortex" in json_docs[0]["content"]
+    assert json_docs[0]["metadata"]["file_type"] == "json"
+
+    # 3. Test DOCX
+    docx_file = tmp_path / "doc.docx"
+    with zipfile.ZipFile(docx_file, "w") as z:
+        xml = '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:t>Kortex Word Document Test</w:t></w:p></w:body></w:document>'
+        z.writestr("word/document.xml", xml)
+    docx_docs = DocumentLoader.load_file(str(docx_file))
+    assert len(docx_docs) == 1
+    assert "Kortex Word Document Test" in docx_docs[0]["content"]
+    assert docx_docs[0]["metadata"]["file_type"] == "docx"
+
+
 

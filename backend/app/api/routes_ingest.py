@@ -27,10 +27,11 @@ class IngestResponse(BaseModel):
 
 @router.post("/file", response_model=IngestResponse)
 async def ingest_file(file: UploadFile = File(...)):
-    """Upload et indexation automatique d'un fichier (PDF, Markdown, TXT)."""
+    """Upload et indexation automatique d'un fichier (PDF, Markdown, DOCX, XLSX, CSV, JSON, TXT)."""
+    allowed_suffixes = [".pdf", ".md", ".txt", ".markdown", ".docx", ".xlsx", ".xlsm", ".csv", ".json"]
     suffix = os.path.splitext(file.filename)[1].lower()
-    if suffix not in [".pdf", ".md", ".txt", ".markdown"]:
-        raise HTTPException(status_code=400, detail="Format non supporté. Utilisez PDF, Markdown ou TXT.")
+    if suffix not in allowed_suffixes:
+        raise HTTPException(status_code=400, detail="Format non supporté. Formats acceptés : PDF, DOCX, XLSX, CSV, JSON, Markdown, TXT.")
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         shutil.copyfileobj(file.file, tmp)
