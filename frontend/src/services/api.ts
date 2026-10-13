@@ -111,3 +111,47 @@ export async function sendQueryStream(
     onError(err);
   }
 }
+
+export async function fetchConversations(): Promise<any[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat/conversations`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchConversation(id: string): Promise<any | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat/conversations/${encodeURIComponent(id)}`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function saveConversationToBackend(id: string, title: string, messages: any[]): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat/conversations/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, messages })
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteConversationFromBackend(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat/conversations/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

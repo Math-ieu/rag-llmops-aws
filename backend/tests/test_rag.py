@@ -88,3 +88,27 @@ def test_s3_storage_graceful_handling():
     assert s3_storage.upload_bytes(b"sample content", "doc.txt") is False
     assert s3_storage.delete_document("doc.txt") is False
 
+def test_chat_store_persistence():
+    from app.db.chat_store import chat_store
+    conv_id = "test-session-123"
+    messages = [
+        {"id": "msg-1", "role": "user", "content": "Question test ?"},
+        {"id": "msg-2", "role": "assistant", "content": "Réponse test avec citation [1].", "sources": [{"id": "s1", "content": "source 1", "metadata": {"source": "doc.pdf"}}]}
+    ]
+    saved = chat_store.save_conversation(conv_id, "Discussion Test", messages)
+    assert saved is True
+
+    fetched = chat_store.get_conversation(conv_id)
+    assert fetched is not None
+    assert fetched["title"] == "Discussion Test"
+    assert len(fetched["messages"]) == 2
+    assert fetched["messages"][0]["content"] == "Question test ?"
+
+    conversations = chat_store.list_conversations()
+    assert any(c["id"] == conv_id for c in conversations)
+
+    deleted = chat_store.delete_conversation(conv_id)
+    assert deleted is True
+    assert chat_store.get_conversation(conv_id) is None
+
+

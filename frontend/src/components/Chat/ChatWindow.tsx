@@ -13,7 +13,13 @@ import {
 } from 'lucide-react';
 import { ChatMessage, ChatSession } from '../../types';
 import { MessageBubble } from './MessageBubble';
-import { sendQueryStream } from '../../services/api';
+import { 
+  sendQueryStream, 
+  fetchConversations, 
+  fetchConversation, 
+  saveConversationToBackend, 
+  deleteConversationFromBackend 
+} from '../../services/api';
 
 const SESSIONS_STORAGE_KEY = 'rag_chat_sessions_v1';
 const ACTIVE_SESSION_STORAGE_KEY = 'rag_active_session_id';
@@ -106,6 +112,36 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
     } catch (e) {}
   }, [sidebarOpen]);
 
+  // Synchronisation initiale avec l'historique de la base PostgreSQL
+  useEffect(() => {
+    let isMounted = true;
+    const syncBackend = async () => {
+      try {
+        const remoteList = await fetchConversations();
+        if (isMounted && Array.isArray(remoteList) && remoteList.length > 0) {
+          setSessions((prev) => {
+            const hasLocalHistory = prev.some((s) => s.messages.length > 0);
+            if (!hasLocalHistory) {
+              const formatted: ChatSession[] = remoteList.map((r: any) => ({
+                id: r.id,
+                title: r.title,
+                createdAt: r.createdAt,
+                updatedAt: r.updatedAt,
+                messages: [],
+              }));
+              return formatted;
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        console.warn('Backend conversations sync skipped', err);
+      }
+    };
+    syncBackend();
+    return () => { isMounted = false; };
+  }, []);
+
   const currentSession = sessions.find((s) => s.id === activeSessionId) || sessions[0] || createEmptySession();
   const currentMessages = currentSession.messages;
 
@@ -126,15 +162,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
     setError(null);
   };
 
-  const handleSelectSession = (id: string) => {
+  const handleSelectSession = async (id: string) => {
     if (isStreaming || id === activeSessionId) return;
     setActiveSessionId(id);
     setError(null);
+
+    const targetSession = sessions.find((s) => s.id === id);
+    if (targetSession && targetSession.messages.length === 0) {
+      try {
+        const fullConv = await fetchConversation(id);
+        if (fullConv && Array.isArray(fullConv.messages) && fullConv.messages.length > 0) {
+          setSessions((prev) =>
+            prev.map((s) => (s.id === id ? { ...s, messages: fullConv.messages } : s))
+          );
+        }
+      } catch (err) {
+        console.warn('Failed to load conversation details', err);
+      }
+    }
   };
 
   const handleDeleteSession = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (isStreaming) return;
+    deleteConversationFromBackend(id);
     const remaining = sessions.filter((s) => s.id !== id);
     if (remaining.length === 0) {
       const newSession = createEmptySession();
@@ -250,8 +301,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
       },
       (doneMetrics) => {
         setIsStreaming(false);
-        setSessions((prev) =>
-          prev.map((s) => {
+        setSessions((prev) => {
+          const updated = prev.map((s) => {
             if (s.id !== currentSession.id) return s;
             return {
               ...s,
@@ -270,8 +321,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
                   : msg
               ),
             };
-          })
-        );
+          });
+
+          // Enregistrement asynchrone sur PostgreSQL
+          const currentTarget = updated.find((s) => s.id === currentSession.id);
+          if (currentTarget && currentTarget.messages.length > 0) {
+            saveConversationToBackend(currentTarget.id, currentTarget.title, currentTarget.messages);
+          }
+
+          return updated;
+        });
       },
       (err) => {
         setIsStreaming(false);
